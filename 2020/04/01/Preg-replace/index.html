@@ -21,7 +21,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/04/01/images/4.jpg">
 <meta property="og:image" content="http://yoursite.com/2020/04/01/images/5.jpg">
 <meta property="article:published_time" content="2020-04-01T00:40:09.000Z">
-<meta property="article:modified_time" content="2020-04-01T00:54:07.584Z">
+<meta property="article:modified_time" content="2020-04-01T00:57:15.635Z">
 <meta property="article:author" content="Tristan">
 <meta property="article:tag" content="web,CTF,PHP">
 <meta name="twitter:card" content="summary">
@@ -167,8 +167,6 @@
 <pre><code>preg_replace(&apos;/(&apos; . $regex . &apos;)/ei&apos;, &apos;strtolower(&quot;\\1&quot;)&apos;, $value);
 preg_replace(&apos;/(.*)/ei&apos;,&apos;strtolower(&quot;\\1&quot;)&apos;,&apos;${phpinfo()}&apos;);</code></pre><p>可以发现对于变量$regex、$value都是用户可控的；<br>因为preg_replace使用了/e模式，所以当在目标字符串中找到符合正则匹配的字符串时，就会进行相应replacement替换，且执行替换内容，也就是 </p>
 <pre><code>eval(&apos;strtolower(&quot;${phpinfo()}}&quot;)&apos;);</code></pre><p>在本地，我们测试一下，看看结果：<br><img src="../images/preg_replace.jpg" alt="preg_replace"><br>这时就发现成功执行命令；但在实际使用时，并不能使用.*,因为PHP会将 “.”自动替换成  “_”命令自然执行不了；</p>
-<a id="more"></a>
-
 <pre><code>这里可以使用Payload：?\S*={${phpinfo()}}</code></pre><h5 id="二、反向引用"><a href="#二、反向引用" class="headerlink" title="二、反向引用"></a>二、反向引用</h5><p>对于”\\1”,w3c是这样解释的：对一个正则表达式模式或部分模式 两边添加圆括号 将导致相关 匹配存储到一个临时缓冲区 中，所捕获的每个子匹配都按照在正则表达式模式中从左到右出现的顺序存储。缓冲区编号从 1 开始，最多可存储 99 个捕获的子表达式。每个缓冲区都可以使用 ‘\n’ 访问，其中 n 为一个标识特定缓冲区的一位或两位十进制数。<br>那么在这里\\1实际上就是\1，也就是第一个子匹配项；即为${phpinfo()}。</p>
 <h5 id="三、PHP中-相关知识"><a href="#三、PHP中-相关知识" class="headerlink" title="三、PHP中${}相关知识"></a>三、PHP中${}相关知识</h5><p>这时就要提及第三个知识点：关于PHP中${}相关知识；若没有${},会产生什么结果呢？<br><img src="../images/2.jpg" alt="11"><br>此时“phpinfo”被PHP理解为字符串而并非一个函数。而${}里函数是会被解析的；<br>除此之外，变量、运算在${}也是会被解析的：<br><img src="../images/3.jpg" alt="2"></p>
 <h3 id="Tips："><a href="#Tips：" class="headerlink" title="Tips："></a>Tips：</h3><pre><code>在${}中，类似echo ···这种没有返回值的式子是不能写的
