@@ -6,13 +6,13 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>GXY-Ping | Welcome to Tristan&#39;s Bolg!</title>
+  <title>GXY-Ping | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="GXYCTF——Ping Ping Ping知识点1、绕过空格过滤的几种姿势2、内联执行3、变量拼接绕过姿势4、绕过cat过滤的几种姿势 实战Ping Ping Ping打开页面，发现只有“&#x2F;?ip&#x3D;”，联想到之前做过的题目，猜测这里可能存在命令执行漏洞；可以通过利用分号或管道符，执行攻击者构造的命令；测试发现可行使用ls后，发现存在两个文件“flag.php”、“index.php”尝试读取fl">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GXY-Ping">
 <meta property="og:url" content="http://yoursite.com/2020/04/07/GXY-Ping/index.html">
-<meta property="og:site_name" content="Welcome to Tristan&#39;s Bolg!">
+<meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
 <meta property="og:description" content="GXYCTF——Ping Ping Ping知识点1、绕过空格过滤的几种姿势2、内联执行3、变量拼接绕过姿势4、绕过cat过滤的几种姿势 实战Ping Ping Ping打开页面，发现只有“&#x2F;?ip&#x3D;”，联想到之前做过的题目，猜测这里可能存在命令执行漏洞；可以通过利用分号或管道符，执行攻击者构造的命令；测试发现可行使用ls后，发现存在两个文件“flag.php”、“index.php”尝试读取fl">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://yoursite.com/2020/04/07/images/6.jpg">
@@ -31,7 +31,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://yoursite.com/2020/04/07/images/6.jpg">
   
-    <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Bolg!" type="application/atom+xml">
+    <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
   
     <link rel="icon" href="/favicon.png">
@@ -257,6 +257,15 @@
   
 <nav id="article-nav">
   
+    <a href="/2020/04/07/Fakebook/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Fakebook
+        
+      </div>
+    </a>
+  
   
     <a href="/2020/04/01/Preg-replace/" id="article-nav-older" class="article-nav-link-wrap">
       <div class="article-nav-title">Preg_replace引起的命令执行漏洞</div>
@@ -391,6 +400,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color3">web,命令执行,CTF</a>
               </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">sql,PHP反序列化,ssrf</a>
+              </li>
             
             <div class="clearfix"></div>
           </ul>
@@ -441,27 +454,15 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
         <ul class="search-ul">
           
             <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接1</a>
+              <a href="/null" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接1</a>
             </li>
           
             <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接2</a>
+              <a href="/null" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接2</a>
             </li>
           
             <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接3</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接4</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接5</a>
-            </li>
-          
-            <li class="search-li">
-              <a href="http://localhost:4000/" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接6</a>
+              <a href="/null" target="_blank" class="search-title"><i class="icon-quo-left icon"></i>友情链接3</a>
             </li>
           
         </ul>
@@ -472,7 +473,7 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
     
     	<section class="tools-section tools-section-me" q-show="aboutme">
   	  	
-  	  		<div class="aboutme-wrap" id="js-aboutme">南京邮电大学2018级&lt;br&gt;web狗&lt;br&gt;渗透测试菜鸟~</div>
+  	  		<div class="aboutme-wrap" id="js-aboutme">南京邮电大学2018级&lt;br&gt;web-dog&lt;br&gt;渗透测试菜鸟&lt;br&gt;小绿草信息安全实验室成员</div>
   	  	
     	</section>
     
