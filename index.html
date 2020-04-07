@@ -139,6 +139,86 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-GXY-Ping" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/07/GXY-Ping/">GXY-Ping</a>
+    </h1>
+  
+
+        
+        <a href="/2020/04/07/GXY-Ping/" class="archive-article-date">
+  	<time datetime="2020-04-07T07:19:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-07</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="GXYCTF——Ping-Ping-Ping"><a href="#GXYCTF——Ping-Ping-Ping" class="headerlink" title="GXYCTF——Ping Ping Ping"></a>GXYCTF——Ping Ping Ping</h2><h3 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h3><p>1、绕过空格过滤的几种姿势<br>2、内联执行<br>3、变量拼接绕过姿势<br>4、绕过cat过滤的几种姿势</p>
+<h3 id="实战Ping-Ping-Ping"><a href="#实战Ping-Ping-Ping" class="headerlink" title="实战Ping Ping Ping"></a>实战Ping Ping Ping</h3><p>打开页面，发现只有“/?ip=”，联想到之前做过的题目，猜测这里可能存在命令执行漏洞；可以通过利用分号或管道符，执行攻击者构造的命令；<br>测试发现可行<br><img src="../images/6.jpg" alt="1"><br>使用ls后，发现存在两个文件“flag.php”、“index.php”<br><img src="../images/7.jpg" alt="2"><br>尝试读取flag.php:cat flag.php（怎么可能这么简单呢….）发现过滤了空格。<br><img src="../images/8.jpg" alt="3"></p>
+<h5 id="前方知识点出没！"><a href="#前方知识点出没！" class="headerlink" title="前方知识点出没！"></a>前方知识点出没！</h5><p>对于过滤空格的情况，通常有以下几个姿势绕过：<br>（1）%09 %20<br>（2）&lt;&gt; 、&lt;<br>（3）${IFS}、$IFS、$IFS$9<br>（4）{cat,flag} 利用花括号和逗号也可绕过<br>经过尝试，发现$IFS$9可行，可是又过滤了flag…<br><img src="../images/9.jpg" alt="4"><br>试着用“f\l\a\g”，绕过失败…于是转换目标对象，试着看看index.php的内容<br>发现过滤了标点符号、bash、flag；<br><img src="../images/10.jpg" alt="5"><br>既然过滤了bash，那试试看能否通过sh执行（因为大部分在bash下的命令在sh中也可执行）<br>构造如下payload：</p>
+<pre><code>/?ip=127.0.0.1;echo$IFS$9Y2F0IGZsYWcucGhw|base64$IFS$9-d|sh</code></pre><p>查看源码发现flag<br><img src="../images/11.jpg" alt="6"></p>
+<h5 id="前方知识点出没！-1"><a href="#前方知识点出没！-1" class="headerlink" title="前方知识点出没！"></a>前方知识点出没！</h5><p>我们稍微拓展一下，如果“cat”被ban了，有什么办法呢？<br>（1）tac：从最后一行倒序显示内容，并将所有内容输出<br>（2）more: 根据窗口大小，一页一页的现实文件内容<br>（3）tail: 只显示最后几行<br>（4）paste也可读取文件<br>（5）ca\t flag.text<br><img src="../images/12.jpg" alt="7"><br>后来看了其他师傅的WP，还有其他解法<br>1、变量拼接，先上payload:</p>
+<pre><code>/?ip=127.0.0.1;a=g;cat$IFS$fla$a</code></pre><p>为什么有这种想法呢？因为通过查看Index.php的源码，发现有一个变量a可控；那么通过变量拼接，可以巧妙的读取flag.php。<br><img src="../images/13.jpg" alt="8"><br>2、内联执行<br>首先简单说明一下，什么是内联执行；cat `ls`;将ls的命令输出作为前面cat命令的输入量；<br><img src="../images/14.jpg" alt="9"><br>构造payload:</p>
+<pre><code>/?ip=127.0.0.1;cat$IFS$9`ls`</code></pre><h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>对于命令执行，通常可以这样做：<br>（1）cat flag  这种做法一般会遇到很多限制：cat、flag等被ban，利用姿势绕过<br>（2）echo “Y2F0IGZsYWcucGhw”| base64 -d | bash” ==&gt;cat flag；如果bash被ban，可以使用sh；<br>（3）使用内联执行：cat <code>ls</code>;</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">web,命令执行,CTF</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/04/07/GXY-Ping/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-Preg-replace" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -317,6 +397,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">web,CTF,PHP</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">web,命令执行,CTF</a>
               </li>
             
             <div class="clearfix"></div>
