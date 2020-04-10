@@ -23,7 +23,7 @@
 <meta property="og:image" content="http://yoursite.com/2020/04/07/images/20.jpg">
 <meta property="og:image" content="http://yoursite.com/2020/04/07/images/21.jpg">
 <meta property="article:published_time" content="2020-04-07T09:02:20.000Z">
-<meta property="article:modified_time" content="2020-04-07T11:37:33.227Z">
+<meta property="article:modified_time" content="2020-04-10T14:02:05.757Z">
 <meta property="article:author" content="Tristan">
 <meta property="article:tag" content="sql,PHP反序列化,ssrf">
 <meta name="twitter:card" content="summary">
@@ -215,7 +215,7 @@ public function isValidBlog () //判断blog输入格式是否符合要求
 }
 }</code></pre><p>通过代码审计，我们发现get（）函数存在ssrf漏洞，由于blog变量用户可控，那么就可利用这一点。<br>这里有一个关键的地方，需要我们自己去猜想：很有可能是将用户注册的个人信息序列化后，存储到数据库中；再将data列中blog的内容提取出来经过反序列化后，进行加载（SSRF漏洞）。这里附上view.php源码<br><img src="../images/19.jpg" alt="5"><br>既然如此，我们可以利用sql注入将构造好的序列化内容注入到数据库中，当从数据库中提取构造好的内容时，自然会加载得到我们想要的内容；可以使用file://协议进行读取。<br>这里存在一个小问题，目标文件路径并不清楚；但从之前报错的信息来看为/var/www/html;猜测文件名为flag.php（有师傅说这个也可以扫出来….）所以就可以使blog=file:///var/www/html/flag.php<br>下面将个人信息进行序列化，注入到数据库中；</p>
 <pre><code>O:8:&quot;UserInfo&quot;:3:{s:4:&quot;name&quot;;s:3:&quot;aaa&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:///var/www/html/flag.php&quot;;}</code></pre><p>这里注意，因为序列化内容对应的是第四列，因此payload为：</p>
-<pre><code>?no=-1 union/**/select 1,2,3,&apos;O:8:&quot;UserInfo&quot;:3:{s:4:&quot;name&quot;;s:3:&quot;aaa&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:///var/www/html/flag.php&quot;;}&apos;#</code></pre><p>查看源码，base64解码即可得到flag：<br>flag{c58e6648-1cad-4546-83c3-b09769087157}<br>###小结<br>这道题主要考察了sql注入、ssrf、php反序列化漏洞三个知识点；<br>（1）sql注入主要考察如何绕过union select过滤；这里我学到一个小知识，以前习惯性认为select语句只能用于查询，而这道题却是通过select语句将构造好的内容注入进数据库中；本地测试了一下；发现union联合的两句select语句，会将第二句select的查找对象“暂时性”存入前面select语句所对应的查询数据库中；这也是这道题为什么可以把内容存入数据库的原因；<br><img src="../images/20.jpg" alt="6"><br><img src="../images/21.jpg" alt="7"><br>拓展一下下：其实爆库、表名、列名最主要依靠的是information_schema这个库，如果这个库被ban了咋办呢?卖个关子，下回分解；<br>（2）这里ssrf漏洞利用了file协议读取某个文件。除此之外常用的还有gopher、dict协议等，后续文章会详细介绍；<br>（3）这里主要是将用户信息先进行序列化后存入数据库；看到_construct()构造函数就得猜测是否有反序列化漏洞；</p>
+<pre><code>?no=-1 union/**/select 1,2,3,&apos;O:8:&quot;UserInfo&quot;:3:{s:4:&quot;name&quot;;s:3:&quot;aaa&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:///var/www/html/flag.php&quot;;}&apos;#</code></pre><p>查看源码，base64解码即可得到flag：<br>flag{c58e6648-1cad-4546-83c3-b09769087157}<br>###小结<br>这道题主要考察了sql注入、ssrf、php反序列化漏洞三个知识点；<br>（1）sql注入主要考察如何绕过union select过滤；这里我学到一个小知识，以前习惯性认为select语句只能用于查询，而这道题却是通过select语句将构造好的内容注入进数据库中；本地测试了一下；发现union联合的两句select语句，会将第二句select的查找对象“暂时性”存入前面select语句所对应的查询数据库中；这也是这道题为什么可以把内容存入数据库的原因；<br><img src="../images/20.jpg" alt="6"><br><img src="../images/21.jpg" alt="7"><br>拓展一下：其实爆库、表名、列名最主要依靠的是information_schema这个库，如果这个库被ban了咋办呢?卖个关子，下回分解；<br>（2）这里ssrf漏洞利用了file协议读取某个文件。除此之外常用的还有gopher、dict协议等，后续文章会详细介绍；<br>（3）这里主要是将用户信息先进行序列化后存入数据库；看到_construct()构造函数就得猜测是否有反序列化漏洞；</p>
 
       
 
@@ -298,6 +298,15 @@ public function isValidBlog () //判断blog输入格式是否符合要求
 
   
 <nav id="article-nav">
+  
+    <a href="/2020/04/10/SSRF-me/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          SSRF_me
+        
+      </div>
+    </a>
   
   
     <a href="/2020/04/07/GXY-Ping/" id="article-nav-older" class="article-nav-link-wrap">
@@ -436,6 +445,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">sql,PHP反序列化,ssrf</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">代码审计，hash_dump</a>
               </li>
             
             <div class="clearfix"></div>
