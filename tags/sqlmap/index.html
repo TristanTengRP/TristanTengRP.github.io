@@ -6,27 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>SSRF_me | Welcome to Tristan&#39;s Blog!</title>
+  <title>Tag: sqlmap | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="知识点1、哈希长度拓展攻击（hash_dump工具）2、字符串拼接利用3、Flask框架代码审计 De1CTF-SSRF me进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点） #! &#x2F;usr&#x2F;bin&#x2F;env python #encoding&#x3D;utf-8 from flask import Flask from flask import request import so">
-<meta property="og:type" content="article">
-<meta property="og:title" content="SSRF_me">
-<meta property="og:url" content="http://yoursite.com/2020/04/10/SSRF-me/index.html">
+  <meta name="description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Welcome to Tristan&#39;s Blog!">
+<meta property="og:url" content="http://yoursite.com/tags/sqlmap/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="知识点1、哈希长度拓展攻击（hash_dump工具）2、字符串拼接利用3、Flask框架代码审计 De1CTF-SSRF me进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点） #! &#x2F;usr&#x2F;bin&#x2F;env python #encoding&#x3D;utf-8 from flask import Flask from flask import request import so">
+<meta property="og:description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/24.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/25.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/26.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/27.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/28.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/29.jpg">
-<meta property="article:published_time" content="2020-04-10T12:41:28.000Z">
-<meta property="article:modified_time" content="2020-04-10T14:01:42.812Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="代码审计，hash_dump">
+<meta property="article:tag" content="web">
+<meta property="article:tag" content="CTFer，hardworking">
+<meta property="article:tag" content="passionate">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/2020/04/10/images/24.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -144,273 +137,60 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-SSRF-me" class="article article-type-post " itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
+            
   
-    <h1 class="article-title" itemprop="name">
-      SSRF_me
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2020" class="archive-year">2020</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      	<div class="article-meta">
+	      	<a href="/2020/04/15/sqlmap/" class="archive-article-date">
+  	<time datetime="2020-04-15T09:05:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-15</time>
+</a>
+        </div>
+    	 
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2020/04/15/sqlmap/">sqlmap</a>
     </h1>
   
 
-        
-        <a href="/2020/04/10/SSRF-me/" class="archive-article-date">
-  	<time datetime="2020-04-10T12:41:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h3><p>1、哈希长度拓展攻击（hash_dump工具）<br>2、字符串拼接利用<br>3、Flask框架代码审计</p>
-<h4 id="De1CTF-SSRF-me"><a href="#De1CTF-SSRF-me" class="headerlink" title="De1CTF-SSRF me"></a>De1CTF-SSRF me</h4><p>进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点）</p>
-<pre><code>#! /usr/bin/env python
-#encoding=utf-8
-from flask import Flask
-from flask import request
-import socket
-import hashlib
-import urllib
-import sys
-import os
-import json
-
-reload(sys)
-sys.setdefaultencoding(&apos;latin1&apos;) //设置默认字体
-
-app = Flask(__name__) //创建一个Flask实例app客户端（一般是浏览器）将请求发送给服务端Web服务器，Web服务器再把请求发给Flask实例。
-
-secert_key = os.urandom(16)//随机生成16Byte密钥，是这次MD5拓展攻击成功的一个因素
-
-class Task:
-def __init__(self, action, param, sign, ip):
-    self.action = action
-    self.param = param
-    self.sign = sign
-    self.sandbox = md5(ip)
-    if(not os.path.exists(self.sandbox)):          #SandBox For Remote_Addr
-        os.mkdir(self.sandbox)
-
-def Exec(self):
-    result = {}
-    result[&apos;code&apos;] = 500
-    if (self.checkSign()):
-        if &quot;scan&quot; in self.action://如果是“scan”动作，就将扫描结果写入文件中
-            tmpfile = open(&quot;./%s/result.txt&quot; % self.sandbox, &apos;w&apos;)
-            resp = scan(self.param)
-            if (resp == &quot;Connection Timeout&quot;):
-                result[&apos;data&apos;] = resp
-            else:
-                print(resp)
-                tmpfile.write(resp)
-                tmpfile.close()
-            result[&apos;code&apos;] = 200
-        if &quot;read&quot; in self.action://如果是“read”操作，就将文件内容以Json格式返回给浏览器
-            f = open(&quot;./%s/result.txt&quot; % self.sandbox, &apos;r&apos;)
-            result[&apos;code&apos;] = 200
-            result[&apos;data&apos;] = f.read()
-        if result[&apos;code&apos;] == 500:
-            result[&apos;data&apos;] = &quot;Action Error&quot;
-    else:
-        result[&apos;code&apos;] = 500
-        result[&apos;msg&apos;] = &quot;Sign Error&quot;
-    return result
-
-def checkSign(self)://验证签名是否一致
-    if (getSign(self.action, self.param) == self.sign):
-        return True
-    else:
-        return False
-#generate Sign For Action Scan.
-@app.route(&quot;/geneSign&quot;, methods=[&apos;GET&apos;, &apos;POST&apos;])  //如果是访问/geneSign，则返回“(secret_key+param+scan)”的加密结果
-def geneSign():
-param = urllib.unquote(request.args.get(&quot;param&quot;, &quot;&quot;))
-action = &quot;scan&quot;
-return getSign(action, param)
-
-@app.route(&apos;/De1ta&apos;,methods=[&apos;GET&apos;,&apos;POST&apos;]) 
-def challenge():
-action = urllib.unquote(request.cookies.get(&quot;action&quot;))
-param = urllib.unquote(request.args.get(&quot;param&quot;, &quot;&quot;))
-sign = urllib.unquote(request.cookies.get(&quot;sign&quot;))
-ip = request.remote_addr
-if(waf(param)): //不能使用gopher、data协议
-    return &quot;No Hacker!!!!&quot;
-task = Task(action, param, sign, ip)
-return json.dumps(task.Exec())
-@app.route(&apos;/&apos;)
-def index(): //显示主页面源码
-return open(&quot;code.txt&quot;,&quot;r&quot;).read()
-
-def scan(param):
-   socket.setdefaulttimeout(1)
-   try:
-      return urllib.urlopen(param).read()[:50]
-   except:
-      return &quot;Connection Timeout&quot;
-
-def getSign(action, param): //加密签名操作
-     return hashlib.md5(secert_key + param + action).hexdigest()
-
-def md5(content):
-      return hashlib.md5(content).hexdigest()
-
-def waf(param):
-check=param.strip().lower()
-if check.startswith(&quot;gopher&quot;) or check.startswith(&quot;file&quot;):
-    return True
-else:
-    return False
-
-if __name__ == &apos;__main__&apos;:
-app.debug = False
-app.run(host=&apos;0.0.0.0&apos;,port=80)</code></pre><h4 id="首先开始审计代码，发现总共有三个页面："><a href="#首先开始审计代码，发现总共有三个页面：" class="headerlink" title="首先开始审计代码，发现总共有三个页面："></a>首先开始审计代码，发现总共有三个页面：</h4><p>（1）主页面/index.php 用来显示源码，没什么特殊的地方<br>（2）/De1ta，接受action,param，sign三个参数；<br>（3）/geneSign 返回（secret_key+param+scan)MD5加密值<br>题目提示我们flag在flag.txt里；猜测应该就是利用exec函数想办法读到flag.txt里的内容。来审计一下exec()：<br><img src="../images/24.jpg" alt="2"><br>其中scan模式，是将param参数文件的内容写入/sandbox/result.txt中<br>read模式，则是将/sandbox/result.txt的内容读出来；<br>那这时就可以考虑先将flag.txt的内容写入result.txt中，然后使用read模式将result.txt读出来，flag.txt内容自然也就出来了；那对于参数”action”就得包含”read”和”scan”;<br>但前提是CheckSign()为True；跟进CheckSign():<br>要求Getsign(self.action, self.param)==self.sign<br><img src="../images/25.jpg" alt="3"><br>再跟进Getsign()函数：<br>发现是对（secr_key+param+action)MD5加密；<br><img src="../images/26.jpg" alt="4"><br>现在的问题就是使得MD5加密后的值要与我们提交的Sign参数相等；但我们并不清楚secret_key的值，无法构造sign；这时注意/geneSign页面，发现返回一个md5值，但却是对(secret_key+param+scan)加密；我们的目标是要构造(secret_key+param+readscan),然后将值赋给参数”sign”;</p>
-<h4 id="解法一：巧妙利用字符串拼接"><a href="#解法一：巧妙利用字符串拼接" class="headerlink" title="解法一：巧妙利用字符串拼接"></a>解法一：巧妙利用字符串拼接</h4><p>重新观察getsign()，发现他是通过”+”将三个变量组成字符串，即对（”secret_keyparamaction”)加密；而/geneSign的结果是对（”secret_keyparamscan”)加密生成的，因为这里scan是固定死的，无从下手，但可以通过param变量将”read”添加进去，即param=flag.txtread;则返回的结果是对（”secret_keyflag.txtreadscan”)加密结果；也就生成了我们需要的sign值；<br><img src="../images/27.jpg" alt="5"><br>此时再构造payload，拿到flag：<br><img src="../images/28.jpg" alt="6"></p>
-<h4 id="解法二：哈希长度拓展攻击"><a href="#解法二：哈希长度拓展攻击" class="headerlink" title="解法二：哈希长度拓展攻击"></a>解法二：哈希长度拓展攻击</h4><p>详细情况，请参考：<a href="https://joychou.org/web/hash-length-extension-attack.html" target="_blank" rel="noopener">https://joychou.org/web/hash-length-extension-attack.html</a><br>我简要概括一下：当已知以下三点</p>
-<pre><code>1、md5(salt+message)的值
-2、message内容
-3、salt+message长度</code></pre><p>我们可以在不知道salt的具体内容的情况下，计算出任意的md5(salt+message+padding+append)值<br>比如就这道题而言，我们已经知道salt为16字节，而flag.txt为8字节<br>所以(salt+message)为24字节；而数据为scan;想要扩展的内容为read；<br>所以使用hash_Pump工具，生成加密值：<br><img src="../images/29.jpg" alt="7"><br>payload:</p>
-<pre><code>import requests
-
-url = &apos;http://33e7e4ef-eaf5-46ac-9523-c0c7dab3c41f.node3.buuoj.cn/De1ta?param=flag.txt&apos;
-
-cookies = {
-&apos;sign&apos;: &apos;42c217eb3287c266c686501944d4ff2d&apos;,
-&apos;action&apos;: &apos;scan%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%e0%00%00%00%00%00%00%00read&apos;,
-}
-
-res = requests.get(url=url, cookies=cookies)
-print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这道题主要学习了Flask框架的代码审计，哈希拓展攻击，以及巧妙利用字符串拼接，生成我们想要的sign值；</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
+        <div class="article-info info-on-right">
+          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">代码审计，hash_dump</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">sqlmap</a>
         		</li>
       		
 		</ul>
 	</div>
 
-      
+          
 
-      
-
-      
-        
-<div class="share-btn share-icons tooltip-left">
-  <div class="tooltip tooltip-east">
-    <span class="tooltip-item">
-      <a href="javascript:;" class="share-sns share-outer">
-        <i class="icon icon-share"></i>
-      </a>
-    </span>
-    <span class="tooltip-content">
-      <div class="share-wrap">
-        <div class="share-icons">
-          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
-            <i class="icon icon-weibo"></i>
-          </a>
-          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
-            <i class="icon icon-weixin"></i>
-          </a>
-          <a class="qq share-sns" href="javascript:;" data-type="qq">
-            <i class="icon icon-qq"></i>
-          </a>
-          <a class="douban share-sns" href="javascript:;" data-type="douban">
-            <i class="icon icon-douban"></i>
-          </a>
-          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
-            <i class="icon icon-qzone"></i>
-          </a>
-          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
-            <i class="icon icon-facebook"></i>
-          </a>
-          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
-            <i class="icon icon-twitter"></i>
-          </a>
-          <a class="google share-sns" href="javascript:;" data-type="google">
-            <i class="icon icon-google"></i>
-          </a>
         </div>
-      </div>
-    </span>
-  </div>
-</div>
-
-<div class="page-modal wx-share js-wx-box">
-    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
-    <p>扫一扫，分享到微信</p>
-    <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/10/SSRF-me/" alt="微信分享二维码">
-    </div>
-</div>
-
-<div class="mask js-mask"></div>
-      
-      <div class="clearfix"></div>
-    </div>
+        <div class="clearfix"></div>
+    </header>
   </div>
 </article>
-
-  
-<nav id="article-nav">
-  
-    <a href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          phpmyadmin4.8.1 任意文件包含漏洞
-        
-      </div>
-    </a>
   
   
-    <a href="/2020/04/07/Fakebook/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Fakebook</div>
-      <i class="icon-circle-right"></i>
-    </a>
-  
-</nav>
-
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-  
-  
+    </div></section>
   
 
-  
-
-  
-
-  
+    
 
 
           </div>
@@ -433,9 +213,9 @@ print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink"
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: true,
+		isPost: false,
 		isArchive: false,
-		isTag: false,
+		isTag: true,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

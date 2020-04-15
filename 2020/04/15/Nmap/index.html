@@ -6,27 +6,20 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>SSRF_me | Welcome to Tristan&#39;s Blog!</title>
+  <title>Nmap | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="知识点1、哈希长度拓展攻击（hash_dump工具）2、字符串拼接利用3、Flask框架代码审计 De1CTF-SSRF me进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点） #! &#x2F;usr&#x2F;bin&#x2F;env python #encoding&#x3D;utf-8 from flask import Flask from flask import request import so">
+  <meta name="description" content="Nmap——端口扫描工具端口状态及扫描原理nmap通过探测将端口划分为6个状态：open：端口是开放的。closed：端口是关闭的。filtered：端口被防火墙IDS&#x2F;IPS屏蔽，无法确定其状态。unfiltered：端口没有被屏蔽，但是否开放需要进一步确定。open|filtered：端口是开放的或被屏蔽。closed|filtered ：端口是关闭的或被屏蔽TCP SYN 扫描（-sS）">
 <meta property="og:type" content="article">
-<meta property="og:title" content="SSRF_me">
-<meta property="og:url" content="http://yoursite.com/2020/04/10/SSRF-me/index.html">
+<meta property="og:title" content="Nmap">
+<meta property="og:url" content="http://yoursite.com/2020/04/15/Nmap/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="知识点1、哈希长度拓展攻击（hash_dump工具）2、字符串拼接利用3、Flask框架代码审计 De1CTF-SSRF me进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点） #! &#x2F;usr&#x2F;bin&#x2F;env python #encoding&#x3D;utf-8 from flask import Flask from flask import request import so">
+<meta property="og:description" content="Nmap——端口扫描工具端口状态及扫描原理nmap通过探测将端口划分为6个状态：open：端口是开放的。closed：端口是关闭的。filtered：端口被防火墙IDS&#x2F;IPS屏蔽，无法确定其状态。unfiltered：端口没有被屏蔽，但是否开放需要进一步确定。open|filtered：端口是开放的或被屏蔽。closed|filtered ：端口是关闭的或被屏蔽TCP SYN 扫描（-sS）">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/24.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/25.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/26.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/27.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/28.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/29.jpg">
-<meta property="article:published_time" content="2020-04-10T12:41:28.000Z">
-<meta property="article:modified_time" content="2020-04-10T14:01:42.812Z">
+<meta property="article:published_time" content="2020-04-15T11:38:44.000Z">
+<meta property="article:modified_time" content="2020-04-15T12:11:56.161Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="代码审计，hash_dump">
+<meta property="article:tag" content="nmap">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/2020/04/10/images/24.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -144,145 +137,33 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-SSRF-me" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-Nmap" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      SSRF_me
+      Nmap
     </h1>
   
 
         
-        <a href="/2020/04/10/SSRF-me/" class="archive-article-date">
-  	<time datetime="2020-04-10T12:41:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-10</time>
+        <a href="/2020/04/15/Nmap/" class="archive-article-date">
+  	<time datetime="2020-04-15T11:38:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-15</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h3><p>1、哈希长度拓展攻击（hash_dump工具）<br>2、字符串拼接利用<br>3、Flask框架代码审计</p>
-<h4 id="De1CTF-SSRF-me"><a href="#De1CTF-SSRF-me" class="headerlink" title="De1CTF-SSRF me"></a>De1CTF-SSRF me</h4><p>进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点）</p>
-<pre><code>#! /usr/bin/env python
-#encoding=utf-8
-from flask import Flask
-from flask import request
-import socket
-import hashlib
-import urllib
-import sys
-import os
-import json
-
-reload(sys)
-sys.setdefaultencoding(&apos;latin1&apos;) //设置默认字体
-
-app = Flask(__name__) //创建一个Flask实例app客户端（一般是浏览器）将请求发送给服务端Web服务器，Web服务器再把请求发给Flask实例。
-
-secert_key = os.urandom(16)//随机生成16Byte密钥，是这次MD5拓展攻击成功的一个因素
-
-class Task:
-def __init__(self, action, param, sign, ip):
-    self.action = action
-    self.param = param
-    self.sign = sign
-    self.sandbox = md5(ip)
-    if(not os.path.exists(self.sandbox)):          #SandBox For Remote_Addr
-        os.mkdir(self.sandbox)
-
-def Exec(self):
-    result = {}
-    result[&apos;code&apos;] = 500
-    if (self.checkSign()):
-        if &quot;scan&quot; in self.action://如果是“scan”动作，就将扫描结果写入文件中
-            tmpfile = open(&quot;./%s/result.txt&quot; % self.sandbox, &apos;w&apos;)
-            resp = scan(self.param)
-            if (resp == &quot;Connection Timeout&quot;):
-                result[&apos;data&apos;] = resp
-            else:
-                print(resp)
-                tmpfile.write(resp)
-                tmpfile.close()
-            result[&apos;code&apos;] = 200
-        if &quot;read&quot; in self.action://如果是“read”操作，就将文件内容以Json格式返回给浏览器
-            f = open(&quot;./%s/result.txt&quot; % self.sandbox, &apos;r&apos;)
-            result[&apos;code&apos;] = 200
-            result[&apos;data&apos;] = f.read()
-        if result[&apos;code&apos;] == 500:
-            result[&apos;data&apos;] = &quot;Action Error&quot;
-    else:
-        result[&apos;code&apos;] = 500
-        result[&apos;msg&apos;] = &quot;Sign Error&quot;
-    return result
-
-def checkSign(self)://验证签名是否一致
-    if (getSign(self.action, self.param) == self.sign):
-        return True
-    else:
-        return False
-#generate Sign For Action Scan.
-@app.route(&quot;/geneSign&quot;, methods=[&apos;GET&apos;, &apos;POST&apos;])  //如果是访问/geneSign，则返回“(secret_key+param+scan)”的加密结果
-def geneSign():
-param = urllib.unquote(request.args.get(&quot;param&quot;, &quot;&quot;))
-action = &quot;scan&quot;
-return getSign(action, param)
-
-@app.route(&apos;/De1ta&apos;,methods=[&apos;GET&apos;,&apos;POST&apos;]) 
-def challenge():
-action = urllib.unquote(request.cookies.get(&quot;action&quot;))
-param = urllib.unquote(request.args.get(&quot;param&quot;, &quot;&quot;))
-sign = urllib.unquote(request.cookies.get(&quot;sign&quot;))
-ip = request.remote_addr
-if(waf(param)): //不能使用gopher、data协议
-    return &quot;No Hacker!!!!&quot;
-task = Task(action, param, sign, ip)
-return json.dumps(task.Exec())
-@app.route(&apos;/&apos;)
-def index(): //显示主页面源码
-return open(&quot;code.txt&quot;,&quot;r&quot;).read()
-
-def scan(param):
-   socket.setdefaulttimeout(1)
-   try:
-      return urllib.urlopen(param).read()[:50]
-   except:
-      return &quot;Connection Timeout&quot;
-
-def getSign(action, param): //加密签名操作
-     return hashlib.md5(secert_key + param + action).hexdigest()
-
-def md5(content):
-      return hashlib.md5(content).hexdigest()
-
-def waf(param):
-check=param.strip().lower()
-if check.startswith(&quot;gopher&quot;) or check.startswith(&quot;file&quot;):
-    return True
-else:
-    return False
-
-if __name__ == &apos;__main__&apos;:
-app.debug = False
-app.run(host=&apos;0.0.0.0&apos;,port=80)</code></pre><h4 id="首先开始审计代码，发现总共有三个页面："><a href="#首先开始审计代码，发现总共有三个页面：" class="headerlink" title="首先开始审计代码，发现总共有三个页面："></a>首先开始审计代码，发现总共有三个页面：</h4><p>（1）主页面/index.php 用来显示源码，没什么特殊的地方<br>（2）/De1ta，接受action,param，sign三个参数；<br>（3）/geneSign 返回（secret_key+param+scan)MD5加密值<br>题目提示我们flag在flag.txt里；猜测应该就是利用exec函数想办法读到flag.txt里的内容。来审计一下exec()：<br><img src="../images/24.jpg" alt="2"><br>其中scan模式，是将param参数文件的内容写入/sandbox/result.txt中<br>read模式，则是将/sandbox/result.txt的内容读出来；<br>那这时就可以考虑先将flag.txt的内容写入result.txt中，然后使用read模式将result.txt读出来，flag.txt内容自然也就出来了；那对于参数”action”就得包含”read”和”scan”;<br>但前提是CheckSign()为True；跟进CheckSign():<br>要求Getsign(self.action, self.param)==self.sign<br><img src="../images/25.jpg" alt="3"><br>再跟进Getsign()函数：<br>发现是对（secr_key+param+action)MD5加密；<br><img src="../images/26.jpg" alt="4"><br>现在的问题就是使得MD5加密后的值要与我们提交的Sign参数相等；但我们并不清楚secret_key的值，无法构造sign；这时注意/geneSign页面，发现返回一个md5值，但却是对(secret_key+param+scan)加密；我们的目标是要构造(secret_key+param+readscan),然后将值赋给参数”sign”;</p>
-<h4 id="解法一：巧妙利用字符串拼接"><a href="#解法一：巧妙利用字符串拼接" class="headerlink" title="解法一：巧妙利用字符串拼接"></a>解法一：巧妙利用字符串拼接</h4><p>重新观察getsign()，发现他是通过”+”将三个变量组成字符串，即对（”secret_keyparamaction”)加密；而/geneSign的结果是对（”secret_keyparamscan”)加密生成的，因为这里scan是固定死的，无从下手，但可以通过param变量将”read”添加进去，即param=flag.txtread;则返回的结果是对（”secret_keyflag.txtreadscan”)加密结果；也就生成了我们需要的sign值；<br><img src="../images/27.jpg" alt="5"><br>此时再构造payload，拿到flag：<br><img src="../images/28.jpg" alt="6"></p>
-<h4 id="解法二：哈希长度拓展攻击"><a href="#解法二：哈希长度拓展攻击" class="headerlink" title="解法二：哈希长度拓展攻击"></a>解法二：哈希长度拓展攻击</h4><p>详细情况，请参考：<a href="https://joychou.org/web/hash-length-extension-attack.html" target="_blank" rel="noopener">https://joychou.org/web/hash-length-extension-attack.html</a><br>我简要概括一下：当已知以下三点</p>
-<pre><code>1、md5(salt+message)的值
-2、message内容
-3、salt+message长度</code></pre><p>我们可以在不知道salt的具体内容的情况下，计算出任意的md5(salt+message+padding+append)值<br>比如就这道题而言，我们已经知道salt为16字节，而flag.txt为8字节<br>所以(salt+message)为24字节；而数据为scan;想要扩展的内容为read；<br>所以使用hash_Pump工具，生成加密值：<br><img src="../images/29.jpg" alt="7"><br>payload:</p>
-<pre><code>import requests
-
-url = &apos;http://33e7e4ef-eaf5-46ac-9523-c0c7dab3c41f.node3.buuoj.cn/De1ta?param=flag.txt&apos;
-
-cookies = {
-&apos;sign&apos;: &apos;42c217eb3287c266c686501944d4ff2d&apos;,
-&apos;action&apos;: &apos;scan%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%e0%00%00%00%00%00%00%00read&apos;,
-}
-
-res = requests.get(url=url, cookies=cookies)
-print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这道题主要学习了Flask框架的代码审计，哈希拓展攻击，以及巧妙利用字符串拼接，生成我们想要的sign值；</p>
+        <h3 id="Nmap——端口扫描工具"><a href="#Nmap——端口扫描工具" class="headerlink" title="Nmap——端口扫描工具"></a>Nmap——端口扫描工具</h3><h4 id="端口状态及扫描原理"><a href="#端口状态及扫描原理" class="headerlink" title="端口状态及扫描原理"></a>端口状态及扫描原理</h4><p>nmap通过探测将端口划分为6个状态：<br>open：端口是开放的。<br>closed：端口是关闭的。<br>filtered：端口被防火墙IDS/IPS屏蔽，无法确定其状态。<br>unfiltered：端口没有被屏蔽，但是否开放需要进一步确定。<br>open|filtered：端口是开放的或被屏蔽。<br>closed|filtered ：端口是关闭的或被屏蔽<br>TCP SYN 扫描（-sS）<br>　　这是默认的扫描方式，通常被称作半开放扫描，该方式通过发送SYN到目标端口，如果收到SYN/ACK回复，就可以判断端口是开放的，如果收到RST包，说明</p>
+<p>该端口是关闭的。如果没有收到回复，就可以判断该端口被屏蔽了，该方式不建立完整的TCP连接，相对比较隐蔽，而且效率高，时用范围广</p>
+<p>TCP connent 扫描（-sT）<br> 　　TCP connect方式使用系统网络API connect向目标主机的端口发起连接，如果无法连接，说明该端口关闭。该方式扫描速度比较慢，而且由于建立完整的TCP连接会在目标主机上留下记录信息，不够隐蔽。所以，TCP connect是TCP SYN无法使用才考虑使用的方式</p>
+<p>TCP ACK 扫描（-sA）</p>
+<p>　　向目标主机的端口发送ACK包，如果收到RST包，说明端口没有被防火墙屏蔽，该方式只能用于确定防火墙是否屏蔽某个端口吗，可以辅助TCP SYN的方式来判断目标主机防火墙的状况</p>
+<h4 id="Nmap常用命令"><a href="#Nmap常用命令" class="headerlink" title="Nmap常用命令"></a>Nmap常用命令</h4><p>1、扫描单个目标地址 nmap直接＋目标地址 nmap 192.168.0.100<br>2、扫描多个地址<br>nmap 192.168.0.100-109<br>3、扫描1.txt中的所有目标地址<br>nmap -iL C:\User\Desktop\1.txt<br>4、扫描除某一个目标地址之外的所有目标地址<br>nmap 192.168.0.100/24 -exclude 192.168.0.105<br>5、扫描某一目标主机的某些端口，使用-p参数<br>nmap 192.168.0.105 -p 21,22,80<br>6、对目标地址进行路由追踪<br>nmap –traceroute 192.168.0.105<br>7、扫描目标地址所在C端的在线状况<br>-sP参数表示使用ping扫描判断主机是否存活，但因为有的主机会禁ping，所以不一定准确<br>nmap -sP 192.168.0.100/24<br>8、操作系统指纹识别、服务版本扫描<br>Nmap -O -sV 192.168.0.105</p>
+<h4 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h4><p> 1 -A ：选项用于使用进攻性方式扫描（同时启用系统指纹识别+服务版本扫描）<br> 2 -T4： 指定扫描过程使用的时序，总有6个级别（0-5），级别越高，扫描速度越快，但也容易被防火墙或IDS检测并屏蔽掉，在网络通讯状况较好的情况下推荐使用T4<br> 3 -oX test.xml： 将扫描结果生成 test.xml 文件<br> 4 -oG test.txt:  将扫描结果生成 test.txt 文件<br> 5 -sn : 只进行主机发现，不进行端口扫描<br> 6 -O : 指定Nmap进行系统版本扫描<br> 7 -sV: 指定让Nmap进行服务版本扫描<br> 8 -p &lt;port ranges&gt;: 扫描指定的端口<br> 9 -sS/sT/sA/sW/sM:指定使用 TCP SYN/Connect()/ACK/Window/Maimon scans的方式来对目标主机进行扫描<br>10 -sU: 指定使用UDP扫描方式确定目标主机的UDP端口状况<br>11 -script &lt;script name&gt; : 指定扫描脚本<br>12 -Pn ： 不进行ping扫描<br>13 -sP :  用ping扫描判断主机是否存活，只有主机存活，nmap才会继续扫描，一般最好不加，因为有的主机会禁止ping<br>14 -PI :  设置这个选项，让nmap使用真正的ping(ICMP echo请求)来扫描目标主机是否正在运行。<br>15 -iL 1.txt : 批量扫描1.txt中的目标地址<br>17 -sL: List Scan 列表扫描，仅将指定的目标的IP列举出来，不进行主机发现<br>18 -sY/sZ: 使用SCTP INIT/COOKIE-ECHO来扫描SCTP协议端口的开放的情况<br>19 -sO: 使用IP protocol 扫描确定目标机支持的协议类型<br>20 -PO : 使用IP协议包探测对方主机是否开启<br>21 -PE/PP/PM : 使用ICMP echo、 ICMP timestamp、ICMP netmask 请求包发现主机<br>22 -PS/PA/PU/PY : 使用TCP SYN/TCP ACK或SCTP INIT/ECHO方式进行发现<br>24 -sN/sF/sX: 指定使用TCP Null, FIN, and Xmas scans秘密扫描方式来协助探测对方的TCP端口状态<br>25 -e eth0：指定使用eth0网卡进行探测<br>26 -f : –mtu &lt;val&gt;: 指定使用分片、指定数据包的 MTU.<br>27 -b &lt;FTP relay host&gt;: 使用FTP bounce scan扫描方式<br>28 -g： 指定发送的端口号<br>29 -r: 不进行端口随机打乱的操作（如无该参数，nmap会将要扫描的端口以随机顺序方式扫描，以让nmap的扫描不易被对方防火墙检测到）<br>30 -v 表示显示冗余信息，在扫描过程中显示扫描的细节，从而让用户了解当前的扫描状态<br>31 -n : 表示不进行DNS解析；<br>32 -D  &lt;decoy1,decoy2[,ME],…&gt;: 用一组 IP 地址掩盖真实地址，其中 ME 填入自己的 IP 地址<br>33 -R ：表示总是进行DNS解析。<br>34 -F : 快速模式，仅扫描TOP 100的端口<br>35 -S &lt;IP_Address&gt;: 伪装成其他 IP 地址<br>36 –ttl &lt;val&gt;: 设置 time-to-live 时间<br>37 –badsum: 使用错误的 checksum 来发送数据包（正常情况下，该类数据包被抛弃，如果收到回复，说明回复来自防火墙或 IDS/IPS）<br>38 –dns-servers  : 指定DNS服务器<br>39 –system-dns : 指定使用系统的DNS服务器<br>40 –traceroute : 追踪每个路由节点<br>41 –scanflags &lt;flags&gt;: 定制TCP包的flags<br>42 –top-ports &lt;number&gt; :扫描开放概率最高的number个端口<br>43 –port-ratio &lt;ratio&gt;: 扫描指定频率以上的端口。与上述–top-ports类似，这里以概率作为参数<br>44 –version-trace: 显示出详细的版本侦测过程信息<br>45 –osscan-limit: 限制Nmap只对确定的主机的进行OS探测（至少需确知该主机分别有一个open和closed的端口）<br>46 –osscan-guess: 大胆猜测对方的主机的系统类型。由此准确性会下降不少，但会尽可能多为用户提供潜在的操作系统<br>47 –data-length &lt;num&gt;: 填充随机数据让数据包长度达到 Num<br>48 –ip-options &lt;options&gt;: 使用指定的 IP 选项来发送数据包<br>49 –spoof-mac &lt;mac address/prefix/vendor name&gt; : 伪装 MAC 地址<br>50 –version-intensity &lt;level&gt;: 指定版本侦测强度（0-9），默认为7。数值越高，探测出的服务越准确，但是运行时间会比较长。<br>51 –version-light: 指定使用轻量侦测方式 (intensity 2)<br>52 –version-all: 尝试使用所有的probes进行侦测 (intensity 9)</p>
 
       
 
@@ -296,7 +177,7 @@ print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink"
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">代码审计，hash_dump</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">nmap</a>
         		</li>
       		
 		</ul>
@@ -352,7 +233,7 @@ print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink"
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/10/SSRF-me/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/15/Nmap/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -366,18 +247,9 @@ print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink"
   
 <nav id="article-nav">
   
-    <a href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          phpmyadmin4.8.1 任意文件包含漏洞
-        
-      </div>
-    </a>
   
-  
-    <a href="/2020/04/07/Fakebook/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Fakebook</div>
+    <a href="/2020/04/15/Burpsuite/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Burpsuite</div>
       <i class="icon-circle-right"></i>
     </a>
   

