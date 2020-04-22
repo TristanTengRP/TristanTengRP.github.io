@@ -6,20 +6,29 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Tag: RCE，PHP函数 | Welcome to Tristan&#39;s Blog!</title>
+  <title>Sql注入之无列名注入 | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:url" content="http://yoursite.com/tags/RCE%EF%BC%8CPHP%E5%87%BD%E6%95%B0/index.html">
+  <meta name="description" content="三月份参加校队考核的时候，遇到过无列名注入+bypass information_schema这个知识点，今天想做个记录（其实是填坑啦…） 知识点1、bypass information_schema2、无列名注入3、join绕过逗号过滤 Bypass information_schema就Sql注入来说，我们对information_schema这个库自然非常熟悉，他是Mysql5.0以上版本自">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sql注入之无列名注入">
+<meta property="og:url" content="http://yoursite.com/2020/04/22/Sql%E6%B3%A8%E5%85%A5%E4%B9%8B%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
+<meta property="og:description" content="三月份参加校队考核的时候，遇到过无列名注入+bypass information_schema这个知识点，今天想做个记录（其实是填坑啦…） 知识点1、bypass information_schema2、无列名注入3、join绕过逗号过滤 Bypass information_schema就Sql注入来说，我们对information_schema这个库自然非常熟悉，他是Mysql5.0以上版本自">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2020/04/22/images/50.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/22/images/49.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/22/images/51.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/22/images/52.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/22/images/53.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/22/images/54.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/22/images/55.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/22/images/56.jpg">
+<meta property="article:published_time" content="2020-04-22T10:46:33.000Z">
+<meta property="article:modified_time" content="2020-04-22T12:09:04.636Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="web">
-<meta property="article:tag" content="CTFer，hardworking">
-<meta property="article:tag" content="passionate">
+<meta property="article:tag" content="sql注入">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/04/22/images/50.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -137,60 +146,163 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-Sql注入之无列名注入" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/20/%E6%97%A0%E5%8F%82RCE/" class="archive-article-date">
-  	<time datetime="2020-04-20T13:33:16.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-20</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/20/%E6%97%A0%E5%8F%82RCE/">无参RCE</a>
+    <h1 class="article-title" itemprop="name">
+      Sql注入之无列名注入
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2020/04/22/Sql%E6%B3%A8%E5%85%A5%E4%B9%8B%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5/" class="archive-article-date">
+  	<time datetime="2020-04-22T10:46:33.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-22</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>三月份参加校队考核的时候，遇到过无列名注入+bypass information_schema这个知识点，今天想做个记录（其实是填坑啦…）</p>
+<h4 id="知识点"><a href="#知识点" class="headerlink" title="知识点"></a>知识点</h4><p>1、bypass information_schema<br>2、无列名注入<br>3、join绕过逗号过滤</p>
+<h4 id="Bypass-information-schema"><a href="#Bypass-information-schema" class="headerlink" title="Bypass information_schema"></a>Bypass information_schema</h4><p>就Sql注入来说，我们对information_schema这个库自然非常熟悉，他是Mysql5.0以上版本自带的数据库，包含着Mysql中所有数据库的信息，包括（table_schema、table_name、column_name等）。可以形象的理解为“数据库字典”。我们经常使用这个数据库爆出库名、表名、字段名；正因如此，有些waf会过滤“or”，这样我们既使用不了order by，同时也查询不到Information__schema这个库，自然得不到相应的信息。今天就来总结一下，如何在查询不了information_schema的情况下，依然能从数据库中得到信息；</p>
+<h5 id="一、使用innodb引擎绕过"><a href="#一、使用innodb引擎绕过" class="headerlink" title="一、使用innodb引擎绕过"></a>一、使用innodb引擎绕过</h5><pre><code>*注：这个方法并不适用所有情况，因为Mysql是默认关闭innodb引擎的；</code></pre><p>既然无法查询information_schema库，就想办法能不能通过其他库进行相关信息查询；对于Mysql来说，可以使用innodb引擎实现。<br>在Mysql中，存储数据的默认引擎分为两类。一类是在5.5.x之前的MyISAM数据存储引擎，另一类是5.5.x版本后的innodb引擎。并且mysql开发团队在5.5.x版本后将innodb作为数据库的默认引擎。</p>
+<p>而在mysql 5.6.x版本起，innodb增添了两个新表，一个是innodb_index_stats,另一个是innodb_table_stats。查阅官方文档，其对这两个新表的解释如下图：</p>
+<p>从官方文档我们可以发现两个有用的信息：</p>
+<pre><code>1、从5.6.x版本开始，innodb_index_stats和innodb_table_stats数据表是自动设置的。
+2、两个表都会存储数据库和对应的数据表。</code></pre><p>本地实验查询：<br>Mysql版本为5.6.40<br><img src="../images/50.jpg" alt="1"></p>
+<p>对innodb_index_stats进行查询：<br><img src="../images/49.jpg" alt="2"></p>
+<p>对innodb_table_stats进行查询：<br><img src="../images/51.jpg" alt="3"></p>
+<h4 id="二、sys-schema-auto-increment-columns绕过"><a href="#二、sys-schema-auto-increment-columns绕过" class="headerlink" title="二、sys.schema_auto_increment_columns绕过"></a>二、sys.schema_auto_increment_columns绕过</h4><p>上面也说过，对于innodb引擎，Mysql是默认关闭的；此时还可以使用sys.schema_table_statistics_with_buffer以及sys.schema_auto_increment_columns达到绕过的效果；<br>先来了解一下这两个是什么东西：</p>
+<pre><code>schema_auto_increment_columns，该视图的作用简单来说就是用来对表自增ID的监控。</code></pre><p>所以查询schema_auto_increment_columns只能查询含有自增字段的表名；</p>
+<pre><code>schema_table_statistics_with_buffer，查询表的统计信息，其中还包括InnoDB缓冲池统计信息</code></pre><p>所以查询schema_table_statistics_with_buffer，可以将上一种方法未查询到的表也显示出来：<br><img src="../images/52.jpg" alt="4"><br>至此，在过滤了information_schema的境况下，我们依然可以通过innodb引擎、sys.schema_table_statistics_with_buffer等方法进行查询。</p>
+<h3 id="无列名注入、Join绕过逗号"><a href="#无列名注入、Join绕过逗号" class="headerlink" title="无列名注入、Join绕过逗号"></a>无列名注入、Join绕过逗号</h3><p>虽然用以上方法，可以解决查询表的问题。但依然查询不到表的相关信息，这时就可以使用无列名注入；通过对要查询的列起别名，并查询这个别名将数据查出，达到未知列名，依旧查询到信息的效果；<br>可以使用</p>
+<pre><code>select `1` from (select 1,2,3 union select * from test)a;</code></pre><p>本地实验：<br><img src="../images/53.jpg" alt="5"><br><img src="../images/54.jpg" alt="6"><br>可以看见，我们对原本的name字段起了个别名”1”，并提供反引号进行查询”1”,将name字段的数据成功查询；<br>有时侯waf也会把反引号过滤，可以使用as，进行绕过：<br><img src="../images/55.jpg" alt="7"></p>
+<p>有时候，waf还会将逗号进行过滤，可以使用join方法进行绕过：</p>
+<pre><code>select b from (select * from (select 1)a join (select 2)aa join (select 3 as b)aaa union select * from test)x; &lt;=&gt;select b from(select 1,2,3 as b union select * from test);</code></pre><p><img src="../images/56.jpg" alt="8"></p>
+<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>主要记录下bypass information_schema的几种方法，以及在sql注入中遇到过的无列名注入和join绕过逗号的姿势；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">RCE，PHP函数</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">sql注入</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/22/Sql%E6%B3%A8%E5%85%A5%E4%B9%8B%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2020/04/21/POP-exercise/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">POP_exercise</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -213,9 +325,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,
