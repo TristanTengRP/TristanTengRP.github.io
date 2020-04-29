@@ -139,6 +139,86 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-Burpsuite" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/04/15/Burpsuite/">Burpsuite</a>
+    </h1>
+  
+
+        
+        <a href="/2020/04/15/Burpsuite/" class="archive-article-date">
+  	<time datetime="2020-04-15T10:52:03.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-15</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="Burpsuite常用功能模块介绍"><a href="#Burpsuite常用功能模块介绍" class="headerlink" title="Burpsuite常用功能模块介绍"></a>Burpsuite常用功能模块介绍</h3><h4 id="模块一：Proxy"><a href="#模块一：Proxy" class="headerlink" title="模块一：Proxy"></a>模块一：Proxy</h4><p>Proxy是BP的核心功能，通过代理模式，可以让我们拦截、查看、修改所有在客户端与服务端之间传输的数据；主要有Forward、Drop、Interception is on/off和Action组成，功能如下所示：<br>Forwarded：将拦截的获是修改后的数据包发送给服务器。<br>Drop:表示丢弃当前拦截的数据包<br>Interception is on:表示开启拦截功能；<br>Action:可以将数据包进一步发送到Spider、Scaner、Repeater、Intruder等模块。</p>
+<h4 id="模块二：Intruder"><a href="#模块二：Intruder" class="headerlink" title="模块二：Intruder"></a>模块二：Intruder</h4><p>主要是用于批量处理（如爆破、fuzz测试等）Positions中有四种攻击方式选择：<br>（1）Sniper:单参数爆破，多参数时同一个字典按顺序替换各参数;添加了一个参数，且假设payload有500个，那么就会执行500次。<br>添加了两个参数，就会挨着来，第一个参数开始爆破时，第二个不变，如此这样，会进行500+500此 总共1000次爆破。<br>（2）Battering ram: 多参数同时爆破，但用的是同一个字典;单个参数情况下，与Sniper一样。<br>两个参数时，和sniper模式不同的地方在于，同样情况下，攻击次数减半，每次两个位置用同样的密码。可以理解为平行攻击（每个参数换的值相同）<br>（3）Pitch Fork:多参数同时爆破，但用的是不同的字典;使用多个字典，每次也是平行取法。如果两个参数的字典大小不同，以小字典为准；<br>（4）Cluster bomb：排列组合所有可能；如第一个参数字典有50个值，第二个参数字典有20个值，则总共进行1000次组合尝试；</p>
+<p>爆破结束后，点击length进行排序，关注长度不同的部分；</p>
+<h4 id="模块三：Spider"><a href="#模块三：Spider" class="headerlink" title="模块三：Spider"></a>模块三：Spider</h4><p>Spider(爬虫)，可以帮助我们了解系统的结构，爬取的内容将在Target中展示；通常对一个站点先进行手动爬网在进行被动爬网在Target界面对目标右键，选择Spider进行爬网；<br>这个模式我用的不多…也不是太清楚，毕竟现在安全法出台后，也不敢随便爬网站了</p>
+<h4 id="模块四：Decoder"><a href="#模块四：Decoder" class="headerlink" title="模块四：Decoder"></a>模块四：Decoder</h4><p>这个模块主要用于对数据的加密、解密；主要有URL、Html、base64、hash加解密等</p>
+<h4 id="模块五-Repeater"><a href="#模块五-Repeater" class="headerlink" title="模块五 Repeater"></a>模块五 Repeater</h4><p>点击Go发送请求后会受到回复，能按下面方式显示：Raw：返回原始数据、Headers：头部分、Hex：十六进制的形式显示、HTML：以HTML源码进行显示，不显示头、Render：对页面进行渲染一下，用户最终看到的近似于该页面；<br>主要用来对请求数据包进行修改，看服务器返回的状态；</p>
+<p>以上是本人经常使用的几个模块，还有一些功能得使用专业版BP，在这不一一说明了；</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">burpsuite</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/04/15/Burpsuite/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-sqlmap" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1107,6 +1187,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color4">sql-injection</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color2">绕过正则匹配</a>
               </li>
             
             <div class="clearfix"></div>
